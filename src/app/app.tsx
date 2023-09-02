@@ -3,7 +3,7 @@ import { LibSharedUi } from 'lib/shared/ui';
 export function App() {
   return (
     <div>
-      <p>hello</p>
+      <p>Welcome focusboard</p>
       <LibSharedUi />
     </div>
   );
