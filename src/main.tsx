@@ -1,6 +1,8 @@
 import { StrictMode } from 'react';
 import * as ReactDOM from 'react-dom/client';
 import { initializeApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
 import App from './app/app';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import { IndexPage } from './app/index/index-page';
@@ -18,6 +20,8 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app);
+export const firestore = getFirestore(app);
 
 const router = createBrowserRouter([
   {
@@ -34,7 +38,11 @@ const router = createBrowserRouter([
       },
       {
         path: 'dashboard',
-        element: <DashboardPage />,
+        element: (
+          // <AuthHOC>
+          <DashboardPage />
+          // </AuthHOC>
+        ),
       },
     ],
     errorElement: <ErrorPage />,
