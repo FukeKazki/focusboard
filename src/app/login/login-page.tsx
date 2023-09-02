@@ -12,7 +12,7 @@ export function LoginPage() {
 
   // ログイン後 ログイン済みのときはダッシュボードに遷移する
   useEffect(() => {
-    if (user && !loading) {
+    if (user) {
       // データがない場合は作成する
       const ref = doc(firestore, 'users', user.uid);
       getDoc(ref)
@@ -33,7 +33,7 @@ export function LoginPage() {
           navigate('/dashboard');
         });
     }
-  }, [user, navigate, loading]);
+  }, [user, navigate]);
 
   return (
     <div>
