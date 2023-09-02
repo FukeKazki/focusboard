@@ -3,6 +3,10 @@ import * as ReactDOM from 'react-dom/client';
 import { initializeApp } from 'firebase/app';
 import App from './app/app';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
+import { IndexPage } from './app/index/index-page';
+import { LoginPage } from './app/login/login-page';
+import { DashboardPage } from './app/dashboard/dashboard-page';
+import { ErrorPage } from './app/error/error-page';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_API_KEY,
@@ -19,6 +23,21 @@ const router = createBrowserRouter([
   {
     path: '/',
     element: <App />,
+    children: [
+      {
+        path: '',
+        element: <IndexPage />,
+      },
+      {
+        path: 'login',
+        element: <LoginPage />,
+      },
+      {
+        path: 'dashboard',
+        element: <DashboardPage />,
+      },
+    ],
+    errorElement: <ErrorPage />,
   },
 ]);
 
