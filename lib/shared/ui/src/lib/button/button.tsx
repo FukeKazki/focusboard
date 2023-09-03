@@ -25,14 +25,14 @@ export const Button = (props: Props) => {
   if (as === 'button') {
     const { ...buttonProps } = props;
     return (
-      <button className="py-2 px-4 border" {...buttonProps}>
+      <button className="btn" {...buttonProps}>
         {children}
       </button>
     );
   } else if (as === 'link') {
     const { ...linkProps } = props;
     return (
-      <Link className="py-2 px-4 border" {...linkProps}>
+      <Link className="btn" {...linkProps}>
         {children}
       </Link>
     );

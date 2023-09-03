@@ -1,0 +1,6 @@
+#my-drawer-3:checked + .drawer-content .children {
+  transform: translateX(320px);
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  transition-duration: 200ms;
+}
