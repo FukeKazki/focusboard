@@ -1,8 +1,9 @@
 import { ComponentProps, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-
+import { cn } from '../../helper';
 type BaseProps = {
   children: ReactNode;
+  className?: string;
 };
 
 // TODO: デフォルトがbuttonになるようにしたい
@@ -23,16 +24,16 @@ export const Button = (props: Props) => {
   const { as, children } = props;
 
   if (as === 'button') {
-    const { ...buttonProps } = props;
+    const { className, ...buttonProps } = props;
     return (
-      <button className="btn" {...buttonProps}>
+      <button className={cn('btn', className)} {...buttonProps}>
         {children}
       </button>
     );
   } else if (as === 'link') {
-    const { ...linkProps } = props;
+    const { className, ...linkProps } = props;
     return (
-      <Link className="btn" {...linkProps}>
+      <Link className={cn('btn', className)} {...linkProps}>
         {children}
       </Link>
     );

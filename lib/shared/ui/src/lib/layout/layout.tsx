@@ -9,10 +9,7 @@ export function Layout({ children }: Props) {
       <input id="my-drawer-3" type="checkbox" className="drawer-toggle" />
       <div className="drawer-content">
         <Header />
-        <div className="children">
-          content
-          {children}
-        </div>
+        <div className="children">{children}</div>
       </div>
       <div className="drawer-side">
         <label htmlFor="my-drawer-3" className="drawer-overlay"></label>

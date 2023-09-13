@@ -4,7 +4,6 @@ import { Outlet } from 'react-router-dom';
 export function App() {
   return (
     <Layout>
-      <p>Welcome focusboard</p>
       <Outlet />
     </Layout>
   );
