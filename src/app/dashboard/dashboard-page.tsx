@@ -8,7 +8,7 @@ import { User, onAuthStateChanged } from 'firebase/auth';
 import { firestore, auth } from '../../main';
 import { useLoaderData } from 'react-router-dom';
 import { Button } from 'lib/shared/ui';
-import { useRef } from 'react';
+import { useReducer, useRef, useState } from 'react';
 
 // const getUserAsync = (): Promise<User | null> => {
 //   return new Promise((resolve) => {
@@ -123,12 +123,62 @@ const boards = [
   },
 ];
 
+type State =
+  | {
+    visible: false;
+  }
+  | {
+    visible: true;
+    listId: string;
+    text: string;
+  };
+
+type Action =
+  | {
+    type: 'OPEN';
+    listId: string;
+  }
+  | {
+    type: 'CLOSE';
+  }
+  | {
+    type: 'CHANGE_TEXT';
+    text: string;
+  };
+
+const reducer = (state: State, action: Action): State => {
+  switch (action.type) {
+    case 'OPEN':
+      return {
+        visible: true,
+        listId: action.listId,
+        text: '',
+      };
+    case 'CLOSE':
+      return {
+        visible: false,
+      };
+    case 'CHANGE_TEXT':
+      return {
+        visible: true,
+        listId: state.visible ? state.listId : '',
+        text: action.text,
+      };
+  }
+};
+
 export function DashboardPage() {
+  // TODO: Recoil で管理する
   const value = useLoaderData() as Awaited<ReturnType<typeof dashboardLoader>>;
   // TODO: board を選択できるように、query params?
   const board = value?.[0];
 
   const taskModalDialogRef = useRef<HTMLDialogElement>(null);
+
+  const [newTaskState, dispatchNewTaskState] = useReducer(reducer, {
+    visible: false,
+  });
+
   return (
     <div>
       {/* toolbar */}
@@ -272,8 +322,66 @@ export function DashboardPage() {
                   </div>
                 </li>
               ))}
+              {newTaskState.visible && newTaskState.listId === list.id && (
+                <li>
+                  <div className="card card-body card-bordered rounded-md cursor-pointer">
+                    <div className="flex gap-2 items-center">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="w-6 h-6"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      <input
+                        type="text"
+                        className="input w-full h-auto"
+                        placeholder="タスクを追加"
+                        autoFocus
+                        // フォーカスが外れたとき
+                        onBlur={() => {
+                          // 未入力のときはキャンセル
+                          if (!newTaskState.text) {
+                            return dispatchNewTaskState({
+                              type: 'CLOSE',
+                            });
+                          }
+                          // 入力されているときは追加
+                          // TODO: サーバーに追加
+                          // refetch するか state を更新するか
+                          // refetch のときは Recoil で管理する必要がある
+                        }}
+                        value={newTaskState.text}
+                        onChange={(e) =>
+                          dispatchNewTaskState({
+                            type: 'CHANGE_TEXT',
+                            text: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
+                    <p className="text-sm text-gray-500">9月1日</p>
+                  </div>
+                </li>
+              )}
               <li>
-                <Button as="button" className="btn-block">
+                <Button
+                  as="button"
+                  className="btn-block"
+                  onClick={() =>
+                    dispatchNewTaskState({
+                      type: 'OPEN',
+                      listId: list.id,
+                    })
+                  }
+                >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
