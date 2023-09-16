@@ -8,6 +8,7 @@ import { User, onAuthStateChanged } from 'firebase/auth';
 import { firestore, auth } from '../../main';
 import { useLoaderData } from 'react-router-dom';
 import { Button } from 'lib/shared/ui';
+import { useRef } from 'react';
 
 // const getUserAsync = (): Promise<User | null> => {
 //   return new Promise((resolve) => {
@@ -81,10 +82,19 @@ const boards = [
             id: 'kchVwJoq98zxZJy9X7jC',
             name: 'FocusBoardの使いかたについて知る',
           },
+          {
+            id: 'kchVwJoq98zxZJy9X7jC-2',
+            name: 'エンジニアのための知的生産術を読む',
+          },
         ],
       },
       {
         id: 'h56UJFE4mYSioOGYAaBy',
+        name: '今日やること',
+        tasks: [],
+      },
+      {
+        id: 'h56UJFE4mYSioOGYAaBya',
         name: '今日やること',
         tasks: [],
       },
@@ -115,12 +125,15 @@ const boards = [
 
 export function DashboardPage() {
   const value = useLoaderData() as Awaited<ReturnType<typeof dashboardLoader>>;
+  // TODO: board を選択できるように、query params?
   const board = value?.[0];
+
+  const taskModalDialogRef = useRef<HTMLDialogElement>(null);
   return (
     <div>
       {/* toolbar */}
       <div className="px-8 py-4 border-b flex justify-between">
-        <h1 className="text-lg font-bold">マイタスク</h1>
+        <h1 className="text-lg font-bold">{board.name}</h1>
         <Button as="button" className="btn-sm">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -140,179 +153,149 @@ export function DashboardPage() {
         </Button>
       </div>
       {/* board */}
-      <ul className="flex gap-4 p-4">
+      <ul className="flex gap-4 p-4 w-screen overflow-x-auto">
         {/* list */}
-        <li>
-          <div className="flex justify-between">
-            <p className="text-2xl">inbox</p>
-            <div>
-              <Button as="button" className="btn-square btn-sm">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-6 h-6"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 4.5v15m7.5-7.5h-15"
-                  />
-                </svg>
-              </Button>
+        {board.lists.map((list) => (
+          <li key={list.id} className="min-w-[400px]">
+            <div className="flex justify-between">
+              <p className="text-2xl">{list.name}</p>
+              <div className="grid gap-1 grid-cols-2">
+                <Button as="button" className="btn-square btn-sm">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="w-6 h-6"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 4.5v15m7.5-7.5h-15"
+                    />
+                  </svg>
+                </Button>
+                <div className="dropdown dropdown-end">
+                  <label tabIndex={0}>
+                    <Button as="button" className="btn-square btn-sm">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="w-6 h-6"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"
+                        />
+                      </svg>
+                    </Button>
+                  </label>
+                  <ul
+                    tabIndex={0}
+                    className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
+                  >
+                    <li>
+                      <button>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={1.5}
+                          stroke="currentColor"
+                          className="w-4 h-4"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"
+                          />
+                        </svg>
+                        セクション名を変更
+                      </button>
+                    </li>
+                    <li>
+                      <button>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={1.5}
+                          stroke="currentColor"
+                          className="w-4 h-4"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"
+                          />
+                        </svg>
+                        セクションを削除
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              </div>
             </div>
-          </div>
-          {/* cards */}
-          <ul className="grid gap-2 mt-4">
-            <li>
-              <div className="card card-bordered border-white rounded-md">
-                <div className="card-body">
-                  <p className="card-title font-normal text-lg">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="w-6 h-6"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    FocusBoardの使いかたについて知る
-                  </p>
-                  <p className="text-sm text-gray-500">9月1日</p>
-                </div>
-              </div>
-            </li>
-            <li>
-              <div className="card card-bordered border-opacity-20 border-white rounded-md">
-                <div className="card-body">
-                  <p className="card-title font-normal text-lg">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="w-6 h-6"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    FocusBoardの使いかたについて知る
-                  </p>
-                  <p className="text-sm text-gray-500">9月1日</p>
-                </div>
-              </div>
-            </li>
-          </ul>
-        </li>
-        {/* list */}
-        <li>
-          <div className="flex justify-between">
-            <p className="text-2xl">今日やること</p>
-            <div>
-              <Button as="button" className="btn-square btn-sm">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-6 h-6"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 4.5v15m7.5-7.5h-15"
-                  />
-                </svg>
-              </Button>
-            </div>
-          </div>
-          {/* cards */}
-          <ul className="grid gap-2 mt-4">
-            <li>
-              <div className="card cursor-pointer card-bordered border-white border-opacity-20 hover:border-opacity-100 rounded-md">
-                <div className="card-body">
-                  <span className="badge badge-info">hackz</span>
-                  <p className="card-title font-normal text-lg">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="w-6 h-6"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    FocusBoardの使いかたについて知る
-                  </p>
-                  <p className="text-sm text-gray-500">今日</p>
-                </div>
-              </div>
-            </li>
-            <li>
-              <div className="card card-bordered border-opacity-20 border-white rounded-md">
-                <div className="card-body">
-                  <p className="card-title font-normal text-lg">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="w-6 h-6"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    FocusBoardの使いかたについて知る
-                  </p>
-                  <p className="text-sm text-gray-500">9月1日</p>
-                </div>
-              </div>
-            </li>
-            <li>
-              <Button as="button" className="btn-block">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-6 h-6"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 4.5v15m7.5-7.5h-15"
-                  />
-                </svg>
-                タスクを追加
-              </Button>
-            </li>
-          </ul>
-        </li>
-        {/* list */}
-        <li>
+            {/* cards */}
+            <ul className="grid gap-2 mt-4">
+              {list.tasks.map((task) => (
+                <li key={task.id}>
+                  <div
+                    className="card card-bordered rounded-md cursor-pointer"
+                    onClick={() => taskModalDialogRef.current?.showModal()}
+                  >
+                    <div className="card-body">
+                      <p className="card-title font-normal text-lg">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={1.5}
+                          stroke="currentColor"
+                          className="w-6 h-6"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                        {task.name}
+                      </p>
+                      <p className="text-sm text-gray-500">9月1日</p>
+                    </div>
+                  </div>
+                </li>
+              ))}
+              <li>
+                <Button as="button" className="btn-block">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="w-6 h-6"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 4.5v15m7.5-7.5h-15"
+                    />
+                  </svg>
+                  タスクを追加
+                </Button>
+              </li>
+            </ul>
+          </li>
+        ))}
+        {/* add list */}
+        <li className="min-w-[400px]">
           <div className="flex justify-between">
             <Button as="button" className="btn-block">
               <svg
@@ -332,9 +315,105 @@ export function DashboardPage() {
               セクションを追加
             </Button>
           </div>
-          <div className="bg-gradient-to-b from-gray-700 to-gray-800 w-[400px] h-96 mt-4 rounded-md" />
         </li>
       </ul>
+      {/* task modal-dialog */}
+      <dialog className="modal" ref={taskModalDialogRef}>
+        <div className="modal-box max-w-5xl">
+          <form method="dialog">
+            <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+              ✕
+            </button>
+          </form>
+          <h3 className="font-bold text-lg flex gap-2 items-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-6 h-6"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            FocusBoardの使い方を知ろう
+          </h3>
+          <ul className="grid gap-2 mt-4">
+            <li className="grid grid-cols-[100px_1fr] gap-4">
+              <p className="text-gray-500">期日</p>
+              <p>9月1日</p>
+            </li>
+            <li className="grid grid-cols-[100px_1fr] gap-4">
+              <p className="text-gray-500">説明</p>
+              <div>
+                <p>マイタスクへようこそ！</p>
+                <p>
+                  マイタスクは自分に割り当てられたすべてのタスクが表示される個人用の計画スペースです。マイタスクでは以下のことができます。
+                </p>
+                <p>
+                  セクションを使ってタスクを計画したり整理したりします
+                  To-Doを記録および管理します
+                </p>
+                <p>期日やプロジェクト、優先度でタスクをソートします</p>
+              </div>
+            </li>
+          </ul>
+          <div className="mt-4">
+            <p className="text-gray-500">サブタスク</p>
+            <ul className="grid gap-2 mt-2">
+              <li>
+                <div className="border-t border-b py-2 border-gray-500 cursor-pointer">
+                  <p className="flex gap-2">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="w-6 h-6"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    FocusBoardアカウントを作成しよう
+                  </p>
+                </div>
+              </li>
+              <li>
+                <div className="border-b py-2 border-gray-500 cursor-pointer">
+                  <p className="flex gap-2">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="w-6 h-6"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    タスクを登録してみよう
+                  </p>
+                </div>
+              </li>
+            </ul>
+            <Button as="button" className="btn-sm mt-4">
+              サブタスクを追加
+            </Button>
+          </div>
+        </div>
+      </dialog>
     </div>
   );
 }
