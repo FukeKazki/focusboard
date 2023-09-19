@@ -1,127 +1,72 @@
 import {
   DocumentReference,
   DocumentSnapshot,
+  addDoc,
   collection,
+  doc,
+  getDoc,
   getDocs,
 } from 'firebase/firestore';
 import { User, onAuthStateChanged } from 'firebase/auth';
 import { firestore, auth } from '../../main';
-import { useLoaderData } from 'react-router-dom';
 import { Button } from 'lib/shared/ui';
-import { useReducer, useRef, useState } from 'react';
+import { useReducer, useRef } from 'react';
+import useSWR from 'swr';
+import { useParams } from 'react-router-dom';
 
-// const getUserAsync = (): Promise<User | null> => {
-//   return new Promise((resolve) => {
-//     const unsubscribe = onAuthStateChanged(auth, (user) => {
-//       // user オブジェクトを resolve
-//       resolve(user);
-//       // 登録解除
-//       unsubscribe();
-//     });
-//   });
-// };
-//
-// async function fetchTasks(listRef: DocumentReference) {
-//   const tasksRef = collection(listRef, 'tasks');
-//   const taskSnapshots = await getDocs(tasksRef);
-//   const tasks = taskSnapshots.docs.map((doc) => ({
-//     id: doc.id,
-//     ...doc.data(),
-//   }));
-//   return tasks;
-// }
-//
-// async function fetchLists(boardDoc: DocumentSnapshot) {
-//   const listsRef = collection(boardDoc.ref, 'lists');
-//   const listSnapshots = await getDocs(listsRef);
-//   const lists = await Promise.all(
-//     listSnapshots.docs.map(async (doc) => {
-//       const tasks = await fetchTasks(doc.ref);
-//       return { id: doc.id, ...doc.data(), tasks };
-//     })
-//   );
-//   return lists;
-// }
-//
-// async function fetchBoards(user: User) {
-//   const boardRef = collection(
-//     firestore,
-//     'workspaces',
-//     user?.uid ?? '',
-//     'boards'
-//   );
-//   const boardSnapshots = await getDocs(boardRef);
-//   const boards = await Promise.all(
-//     boardSnapshots.docs.map(async (doc) => {
-//       const lists = await fetchLists(doc);
-//       return { id: doc.id, ...doc.data(), lists };
-//     })
-//   );
-//   return boards;
-// }
-//
-export const dashboardLoader = async () => {
-  // const user = await getUserAsync();
-  // if (!user) {
-  //   return;
-  // }
-  // return await fetchBoards(user);
-  return boards;
+export const getUserAsync = (): Promise<User | null> => {
+  return new Promise((resolve) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      // user オブジェクトを resolve
+      resolve(user);
+      // 登録解除
+      unsubscribe();
+    });
+  });
 };
 
-const boards = [
-  {
-    id: 'hsJDohDYDTcXxjXph69s',
-    name: 'マイタスク',
-    lists: [
-      {
-        id: 'YZnIZ46u6LWdCFeQxAaw',
-        name: 'inbox',
-        tasks: [
-          {
-            id: 'kchVwJoq98zxZJy9X7jC',
-            name: 'FocusBoardの使いかたについて知る',
-          },
-          {
-            id: 'kchVwJoq98zxZJy9X7jC-2',
-            name: 'エンジニアのための知的生産術を読む',
-          },
-        ],
-      },
-      {
-        id: 'h56UJFE4mYSioOGYAaBy',
-        name: '今日やること',
-        tasks: [],
-      },
-      {
-        id: 'h56UJFE4mYSioOGYAaBya',
-        name: '今日やること',
-        tasks: [],
-      },
-    ],
-  },
-  {
-    id: 'hsJDohDYDTcXxjXph69s',
-    name: '読書',
-    lists: [
-      {
-        id: 'YZnIZ46u6LWdCFeQxAaw',
-        name: 'inbox',
-        tasks: [
-          {
-            id: 'kchVwJoq98zxZJy9X7jC',
-            name: 'FocusBoardの使いかたについて知る',
-          },
-        ],
-      },
-      {
-        id: 'h56UJFE4mYSioOGYAaBy',
-        name: '今日やること',
-        tasks: [],
-      },
-    ],
-  },
-];
+async function fetchTasks(listRef: DocumentReference) {
+  const tasksRef = collection(listRef, 'tasks');
+  const taskSnapshots = await getDocs(tasksRef);
+  const tasks = taskSnapshots.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
+  return tasks;
+}
+
+async function fetchLists(boardDoc: DocumentSnapshot) {
+  const listsRef = collection(boardDoc.ref, 'lists');
+  const listSnapshots = await getDocs(listsRef);
+  const lists = await Promise.all(
+    listSnapshots.docs.map(async (doc) => {
+      const tasks = await fetchTasks(doc.ref);
+      return { id: doc.id, ...doc.data(), tasks };
+    })
+  );
+  return lists;
+}
+
+type Task = {
+  id: string;
+  name: string;
+};
+type List = {
+  id: string;
+  name: string;
+  tasks: Task[];
+};
+export type Board = {
+  id: string;
+  name: string;
+  lists: List[];
+};
+async function fetchBoard(user: User, id: string) {
+  const boardRef = doc(firestore, 'workspaces', user?.uid ?? '', 'boards', id);
+  const boardSnapshots = await getDoc(boardRef);
+  const lists = await fetchLists(boardSnapshots);
+  return { id: boardSnapshots.id, ...boardSnapshots.data(), lists } as Board;
+}
 
 type State =
   | {
@@ -168,22 +113,58 @@ const reducer = (state: State, action: Action): State => {
 };
 
 export function DashboardPage() {
-  // TODO: Recoil で管理する
-  const value = useLoaderData() as Awaited<ReturnType<typeof dashboardLoader>>;
-  // TODO: board を選択できるように、query params?
-  const board = value?.[0];
+  const { id } = useParams();
+  const { data: board, mutate } = useSWR(
+    () => 'boards/?id=' + id,
+    async () => {
+      const user = await getUserAsync();
+      if (!user) {
+        return;
+      }
+      if (!id) {
+        return;
+      }
+      return fetchBoard(user, id);
+    },
+    {
+      revalidateOnFocus: false,
+    }
+  );
+
+  const addTask = async (
+    board: Pick<Board, 'id'>,
+    list: Pick<List, 'id'>,
+    input: Pick<Task, 'name'>
+  ) => {
+    const user = await getUserAsync();
+    if (!user) {
+      return;
+    }
+    const boardRef = collection(
+      firestore,
+      'workspaces',
+      user?.uid ?? '',
+      'boards',
+      board.id,
+      'lists',
+      list.id,
+      'tasks'
+    );
+    await addDoc(boardRef, {
+      name: input.name,
+    });
+  };
 
   const taskModalDialogRef = useRef<HTMLDialogElement>(null);
 
   const [newTaskState, dispatchNewTaskState] = useReducer(reducer, {
     visible: false,
   });
-
   return (
     <div>
       {/* toolbar */}
       <div className="px-8 py-4 border-b flex justify-between">
-        <h1 className="text-lg font-bold">{board.name}</h1>
+        <h1 className="text-lg font-bold">{board?.name}</h1>
         <Button as="button" className="btn-sm">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -205,7 +186,7 @@ export function DashboardPage() {
       {/* board */}
       <ul className="flex gap-4 p-4 w-screen overflow-x-auto">
         {/* list */}
-        {board.lists.map((list) => (
+        {board?.lists?.map((list) => (
           <li key={list.id} className="min-w-[400px]">
             <div className="flex justify-between">
               <p className="text-2xl">{list.name}</p>
@@ -346,7 +327,7 @@ export function DashboardPage() {
                         placeholder="タスクを追加"
                         autoFocus
                         // フォーカスが外れたとき
-                        onBlur={() => {
+                        onBlur={async () => {
                           // 未入力のときはキャンセル
                           if (!newTaskState.text) {
                             return dispatchNewTaskState({
@@ -354,9 +335,14 @@ export function DashboardPage() {
                             });
                           }
                           // 入力されているときは追加
-                          // TODO: サーバーに追加
-                          // refetch するか state を更新するか
-                          // refetch のときは Recoil で管理する必要がある
+                          await addTask(board, list, {
+                            name: newTaskState.text,
+                          });
+                          // ローカルデータの更新
+                          mutate();
+                          dispatchNewTaskState({
+                            type: 'CLOSE',
+                          });
                         }}
                         value={newTaskState.text}
                         onChange={(e) =>
