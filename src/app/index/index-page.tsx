@@ -7,9 +7,6 @@ export function IndexPage() {
       <Button as="link" to="/login">
         ログイン
       </Button>
-      <Button as="link" to="/dashboard">
-        ダッシュボード
-      </Button>
     </div>
   );
 }

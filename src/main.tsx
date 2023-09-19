@@ -7,7 +7,7 @@ import App from './app/app';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import { IndexPage } from './app/index/index-page';
 import { LoginPage } from './app/login/login-page';
-import { DashboardPage, dashboardLoader } from './app/dashboard/dashboard-page';
+import { DashboardPage } from './app/dashboard/dashboard-page';
 import { ErrorPage } from './app/error/error-page';
 
 const firebaseConfig = {
@@ -37,8 +37,7 @@ const router = createBrowserRouter([
         element: <LoginPage />,
       },
       {
-        path: 'dashboard',
-        loader: dashboardLoader,
+        path: 'dashboard/:id',
         element: (
           // <AuthHOC>
           <DashboardPage />
