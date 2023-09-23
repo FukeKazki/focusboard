@@ -9,6 +9,7 @@ import { IndexPage } from './app/index/index-page';
 import { LoginPage } from './app/login/login-page';
 import { DashboardPage } from './app/dashboard/dashboard-page';
 import { ErrorPage } from './app/error/error-page';
+import { FirebaseAuthProvider } from './app/feature/user-hook';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_API_KEY,
@@ -54,6 +55,8 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <FirebaseAuthProvider>
+      <RouterProvider router={router} />
+    </FirebaseAuthProvider>
   </StrictMode>
 );

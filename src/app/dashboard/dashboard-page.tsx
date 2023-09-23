@@ -1,95 +1,33 @@
-import {
-  DocumentReference,
-  DocumentSnapshot,
-  addDoc,
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-} from 'firebase/firestore';
-import { User, onAuthStateChanged } from 'firebase/auth';
-import { firestore, auth } from '../../main';
 import { Button } from 'lib/shared/ui';
-import { useReducer, useRef } from 'react';
-import useSWR from 'swr';
+import { useReducer, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-
-export const getUserAsync = (): Promise<User | null> => {
-  return new Promise((resolve) => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      // user オブジェクトを resolve
-      resolve(user);
-      // 登録解除
-      unsubscribe();
-    });
-  });
-};
-
-async function fetchTasks(listRef: DocumentReference) {
-  const tasksRef = collection(listRef, 'tasks');
-  const taskSnapshots = await getDocs(tasksRef);
-  const tasks = taskSnapshots.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  }));
-  return tasks;
-}
-
-async function fetchLists(boardDoc: DocumentSnapshot) {
-  const listsRef = collection(boardDoc.ref, 'lists');
-  const listSnapshots = await getDocs(listsRef);
-  const lists = await Promise.all(
-    listSnapshots.docs.map(async (doc) => {
-      const tasks = await fetchTasks(doc.ref);
-      return { id: doc.id, ...doc.data(), tasks };
-    })
-  );
-  return lists;
-}
-
-type Task = {
-  id: string;
-  name: string;
-};
-type List = {
-  id: string;
-  name: string;
-  tasks: Task[];
-};
-export type Board = {
-  id: string;
-  name: string;
-  lists: List[];
-};
-async function fetchBoard(user: User, id: string) {
-  const boardRef = doc(firestore, 'workspaces', user?.uid ?? '', 'boards', id);
-  const boardSnapshots = await getDoc(boardRef);
-  const lists = await fetchLists(boardSnapshots);
-  return { id: boardSnapshots.id, ...boardSnapshots.data(), lists } as Board;
-}
+import { TaskModalDialog } from './components/task-modal-dialog';
+import { List, Task } from '../feature/type';
+import { useUser } from '../feature/user-hook';
+import { useApiService } from '../feature/board-hook';
 
 type State =
   | {
-    visible: false;
-  }
+      visible: false;
+    }
   | {
-    visible: true;
-    listId: string;
-    text: string;
-  };
+      visible: true;
+      listId: string;
+      text: string;
+    };
 
 type Action =
   | {
-    type: 'OPEN';
-    listId: string;
-  }
+      type: 'OPEN';
+      listId: string;
+    }
   | {
-    type: 'CLOSE';
-  }
+      type: 'CLOSE';
+    }
   | {
-    type: 'CHANGE_TEXT';
-    text: string;
-  };
+      type: 'CHANGE_TEXT';
+      text: string;
+    };
 
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -114,80 +52,74 @@ const reducer = (state: State, action: Action): State => {
 
 export function DashboardPage() {
   const { id } = useParams();
-  const { data: board, mutate } = useSWR(
-    () => 'boards/?id=' + id,
-    async () => {
-      const user = await getUserAsync();
-      if (!user) {
-        return;
-      }
-      if (!id) {
-        return;
-      }
-      return fetchBoard(user, id);
-    },
-    {
-      revalidateOnFocus: false,
-    }
-  );
-
-  const addTask = async (
-    board: Pick<Board, 'id'>,
-    list: Pick<List, 'id'>,
-    input: Pick<Task, 'name'>
-  ) => {
-    const user = await getUserAsync();
-    if (!user) {
-      return;
-    }
-    const boardRef = collection(
-      firestore,
-      'workspaces',
-      user?.uid ?? '',
-      'boards',
-      board.id,
-      'lists',
-      list.id,
-      'tasks'
-    );
-    await addDoc(boardRef, {
-      name: input.name,
-    });
-  };
+  const { currentUser } = useUser();
+  const { useBoard, useAddTask } = useApiService();
+  const { data: board, mutate } = useBoard(currentUser, id as string);
+  const { addTask } = useAddTask(currentUser);
 
   const taskModalDialogRef = useRef<HTMLDialogElement>(null);
 
   const [newTaskState, dispatchNewTaskState] = useReducer(reducer, {
     visible: false,
   });
+  const [selectedTask, setSelectedTask] = useState<Task | undefined>();
+  const [selectedList, setSelectedList] = useState<List | undefined>();
   return (
     <div>
       {/* toolbar */}
       <div className="px-8 py-4 border-b flex justify-between">
         <h1 className="text-lg font-bold">{board?.name}</h1>
-        <Button as="button" className="btn-sm">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="w-4 h-4"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M3 7.5L7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5"
-            />
-          </svg>
-          ソート
-        </Button>
+        <div className="flex gap-2">
+          <Button as="button" className="btn-sm">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-6 h-6"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+              />
+            </svg>
+            サブタスクを表示
+          </Button>
+          <Button as="button" className="btn-sm">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-4 h-4"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M3 7.5L7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5"
+              />
+            </svg>
+            ソート
+          </Button>
+        </div>
       </div>
       {/* board */}
       <ul className="flex gap-4 p-4 w-screen overflow-x-auto">
         {/* list */}
         {board?.lists?.map((list) => (
-          <li key={list.id} className="min-w-[400px]">
+          <li
+            key={list.id}
+            className="min-w-[400px]"
+            onClick={() => setSelectedList(list)}
+          >
             <div className="flex justify-between">
               <p className="text-2xl">{list.name}</p>
               <div className="grid gap-1 grid-cols-2">
@@ -278,7 +210,10 @@ export function DashboardPage() {
                 <li key={task.id}>
                   <div
                     className="card card-bordered rounded-md cursor-pointer"
-                    onClick={() => taskModalDialogRef.current?.showModal()}
+                    onClick={() => {
+                      setSelectedTask(task);
+                      taskModalDialogRef.current?.showModal();
+                    }}
                   >
                     <div className="card-body">
                       <p className="card-title font-normal text-lg">
@@ -335,8 +270,9 @@ export function DashboardPage() {
                             });
                           }
                           // 入力されているときは追加
-                          await addTask(board, list, {
+                          await addTask(board.id, list.id, {
                             name: newTaskState.text,
+                            isSubTask: false,
                           });
                           // ローカルデータの更新
                           mutate();
@@ -411,103 +347,12 @@ export function DashboardPage() {
           </div>
         </li>
       </ul>
-      {/* task modal-dialog */}
-      <dialog className="modal" ref={taskModalDialogRef}>
-        <div className="modal-box max-w-5xl">
-          <form method="dialog">
-            <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
-              ✕
-            </button>
-          </form>
-          <h3 className="font-bold text-lg flex gap-2 items-center">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="w-6 h-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            FocusBoardの使い方を知ろう
-          </h3>
-          <ul className="grid gap-2 mt-4">
-            <li className="grid grid-cols-[100px_1fr] gap-4">
-              <p className="text-gray-500">期日</p>
-              <p>9月1日</p>
-            </li>
-            <li className="grid grid-cols-[100px_1fr] gap-4">
-              <p className="text-gray-500">説明</p>
-              <div>
-                <p>マイタスクへようこそ！</p>
-                <p>
-                  マイタスクは自分に割り当てられたすべてのタスクが表示される個人用の計画スペースです。マイタスクでは以下のことができます。
-                </p>
-                <p>
-                  セクションを使ってタスクを計画したり整理したりします
-                  To-Doを記録および管理します
-                </p>
-                <p>期日やプロジェクト、優先度でタスクをソートします</p>
-              </div>
-            </li>
-          </ul>
-          <div className="mt-4">
-            <p className="text-gray-500">サブタスク</p>
-            <ul className="grid gap-2 mt-2">
-              <li>
-                <div className="border-t border-b py-2 border-gray-500 cursor-pointer">
-                  <p className="flex gap-2">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="w-6 h-6"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    FocusBoardアカウントを作成しよう
-                  </p>
-                </div>
-              </li>
-              <li>
-                <div className="border-b py-2 border-gray-500 cursor-pointer">
-                  <p className="flex gap-2">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="w-6 h-6"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    タスクを登録してみよう
-                  </p>
-                </div>
-              </li>
-            </ul>
-            <Button as="button" className="btn-sm mt-4">
-              サブタスクを追加
-            </Button>
-          </div>
-        </div>
-      </dialog>
+      <TaskModalDialog
+        ref={taskModalDialogRef}
+        boardId={board?.id ?? ''}
+        listId={selectedList?.id ?? ''}
+        taskId={selectedTask?.id ?? ''}
+      />
     </div>
   );
 }

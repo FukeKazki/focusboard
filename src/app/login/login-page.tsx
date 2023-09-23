@@ -30,7 +30,7 @@ export function LoginPage() {
           console.error('Error getting document:', error);
         })
         .finally(() => {
-          navigate('/dashboard');
+          // navigate('/dashboard');
         });
     }
   }, [user, navigate]);
