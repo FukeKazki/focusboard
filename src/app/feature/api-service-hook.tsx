@@ -42,18 +42,12 @@ class ApiService {
 
   async fetchTask(
     user: User,
-    input:
-      | DocumentReference
-      | {
-          boardId: string;
-          listId: string;
-          taskId: string;
-        }
-  ) {
-    if (input instanceof DocumentReference) {
-      const taskRef = await getDoc(input);
-      return { id: taskRef.id, ...taskRef.data() } as Task;
+    input: {
+      boardId: string;
+      listId: string;
+      taskId: string;
     }
+  ) {
     const ref = doc(
       this.firestore,
       'workspaces',
@@ -88,10 +82,9 @@ class ApiService {
   }
   private async fetchTasks(listRef: DocumentReference) {
     const tasksRef = collection(listRef, 'tasks');
-    const q = query(tasksRef, where('isSubTask', '==', false));
+    // const q = query(tasksRef, where('isSubTask', '==', false));
     // subTask除外する
-    // kirikaeru
-    const taskSnapshots = await getDocs(q);
+    const taskSnapshots = await getDocs(tasksRef);
     const tasks = taskSnapshots.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
@@ -110,7 +103,7 @@ class ApiService {
       listId,
       'tasks'
     );
-    await addDoc(boardRef, input);
+    return await addDoc(boardRef, input);
   }
 
   async updateTask(
@@ -145,6 +138,17 @@ class ApiService {
   ) {
     const res = await this.addTask(user, boardId, listId, {
       ...input,
+      parent: doc(
+        this.firestore,
+        'workspaces',
+        user.uid,
+        'boards',
+        boardId,
+        'lists',
+        listId,
+        'tasks',
+        input.parent
+      ),
       isSubTask: true,
     });
 
@@ -173,12 +177,10 @@ export const useApiService = () => {
 
   const useTask = (
     user: User | null | undefined,
-    input:
-      | DocumentReference
-      | { boardId: string; listId: string; taskId: string }
+    input: { boardId: string; listId: string; taskId: string }
   ) => {
     return useSWR(
-      ['task', user, input],
+      ['task', user, input.boardId, input.listId, input.taskId],
       async () => {
         if (!user) {
           return;

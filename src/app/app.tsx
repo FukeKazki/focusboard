@@ -1,7 +1,7 @@
 import { Layout } from 'lib/shared/ui';
 import { Outlet } from 'react-router-dom';
 import { useUser } from './feature/user-hook';
-import { useApiService } from './feature/board-hook';
+import { useApiService } from './feature/api-service-hook';
 
 export function App() {
   const { currentUser } = useUser();

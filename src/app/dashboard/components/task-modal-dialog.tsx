@@ -4,12 +4,12 @@ import useSWR from 'swr';
 import { DocumentReference, getDoc } from 'firebase/firestore';
 import { Task } from '../../feature/type';
 import { useUser } from '../../feature/user-hook';
-import { useApiService } from '../../feature/board-hook';
+import { useApiService } from '../../feature/api-service-hook';
+import { useDashboard } from '../hooks/dashboard-state';
 
 type Props = {
   boardId: string;
-  listId: string;
-  taskId: string;
+  handleSelectSubTask: (subTask: Task) => void;
 } & ComponentPropsWithoutRef<'dialog'>;
 
 const fetchSubTasks = async (subTaskIds: DocumentReference[]) => {
@@ -63,13 +63,14 @@ const reducer = (_state: State, action: Action): State => {
 };
 
 export const TaskModalDialog = forwardRef<HTMLDialogElement, Props>(
-  ({ boardId, listId, taskId, ...props }, ref) => {
+  ({ boardId, handleSelectSubTask, ...props }, ref) => {
     const { currentUser } = useUser();
+    const { dashboardState } = useDashboard();
     const { useTask, useAddSubTask } = useApiService();
     const { data, mutate: mutateTask } = useTask(currentUser, {
       boardId: boardId,
-      listId: listId,
-      taskId: taskId,
+      listId: dashboardState.selectedList?.id ?? '',
+      taskId: dashboardState.selectedTask?.id ?? '',
     });
     const { addSubTask } = useAddSubTask(currentUser);
 
@@ -132,7 +133,10 @@ export const TaskModalDialog = forwardRef<HTMLDialogElement, Props>(
             <p className="text-gray-500">サブタスク</p>
             <ul className="grid gap-2 mt-2">
               {subTasks?.map((subTask) => (
-                <li key={subTask.id}>
+                <li
+                  key={subTask.id}
+                  onClick={() => handleSelectSubTask(subTask)}
+                >
                   <div className="border-t border-b py-2 border-gray-500 cursor-pointer">
                     <p className="flex gap-2">
                       <svg
@@ -185,11 +189,21 @@ export const TaskModalDialog = forwardRef<HTMLDialogElement, Props>(
                               type: 'CLOSE',
                             });
                           }
+                          if (!dashboardState.selectedList?.id) {
+                            return;
+                          }
+                          if (!dashboardState.selectedTask?.id) {
+                            return;
+                          }
                           // 入力されているときは追加
-                          await addSubTask(boardId, listId, {
-                            name: newTaskState.text,
-                            parent: taskId,
-                          });
+                          await addSubTask(
+                            boardId,
+                            dashboardState.selectedList.id,
+                            {
+                              name: newTaskState.text,
+                              parent: dashboardState.selectedTask.id,
+                            }
+                          );
                           // ローカルデータの更新
                           mutateTask();
                           dispatchNewTaskState({
