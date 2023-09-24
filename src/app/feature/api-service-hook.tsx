@@ -9,13 +9,11 @@ import {
   doc,
   getDoc,
   getDocs,
-  query,
   updateDoc,
-  where,
 } from 'firebase/firestore';
 import { Board, Task } from './type';
-import { firestore } from '../../main';
 import useSWR from 'swr';
+import { firestore } from '../lib/firebase';
 
 class ApiService {
   firestore: Firestore;

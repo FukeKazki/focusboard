@@ -1,4 +1,4 @@
-import { Button } from 'lib/shared/ui';
+import { Button, cn } from 'lib/shared/ui';
 import { useReducer, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { TaskModalDialog } from './components/task-modal-dialog';
@@ -238,7 +238,10 @@ const DashboardPagePresenter = ({
                   className={showSubTask && task.isSubTask ? 'hidden' : 'block'}
                 >
                   <div
-                    className="card card-bordered rounded-md cursor-pointer"
+                    className={cn(
+                      'card card-bordered rounded-md cursor-pointer border-gray-200 shadow-sm',
+                      task.isSubTask && 'border-gray-100'
+                    )}
                     onClick={() => {
                       dispatchDashboardState({ type: 'SELECT_TASK', task });
                       taskModalDialogRef.current?.showModal();

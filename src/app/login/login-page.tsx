@@ -1,13 +1,14 @@
 import { Button } from 'lib/shared/ui';
-import { useAuthState, useSignInWithGoogle } from 'react-firebase-hooks/auth';
-import { auth, firestore } from '../../main';
+import { useSignInWithGoogle } from 'react-firebase-hooks/auth';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { useUser } from '../feature/user-hook';
+import { auth, firestore } from '../lib/firebase';
 
 export function LoginPage() {
+  const { currentUser: user } = useUser();
   const [signInWithGoogle, loading, error] = useSignInWithGoogle(auth);
-  const [user] = useAuthState(auth);
   const navigate = useNavigate();
 
   // ログイン後 ログイン済みのときはダッシュボードに遷移する

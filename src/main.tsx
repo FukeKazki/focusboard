@@ -1,8 +1,5 @@
 import { StrictMode } from 'react';
 import * as ReactDOM from 'react-dom/client';
-import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
 import App from './app/app';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import { IndexPage } from './app/index/index-page';
@@ -11,23 +8,14 @@ import { DashboardPage } from './app/dashboard/dashboard-page';
 import { ErrorPage } from './app/error/error-page';
 import { FirebaseAuthProvider } from './app/feature/user-hook';
 
-const firebaseConfig = {
-  apiKey: import.meta.env.VITE_API_KEY,
-  authDomain: import.meta.env.VITE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_APP_ID,
-};
-
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const firestore = getFirestore(app);
-
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <App />,
+    element: (
+      <FirebaseAuthProvider>
+        <App />
+      </FirebaseAuthProvider>
+    ),
     children: [
       {
         path: '',
@@ -39,24 +27,19 @@ const router = createBrowserRouter([
       },
       {
         path: 'dashboard/:id',
-        element: (
-          // <AuthHOC>
-          <DashboardPage />
-          // </AuthHOC>
-        ),
+        element: <DashboardPage />,
       },
     ],
     errorElement: <ErrorPage />,
   },
 ]);
 
-const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
-);
-root.render(
-  <StrictMode>
-    <FirebaseAuthProvider>
+const rootElement = document.getElementById('root');
+if (rootElement !== null) {
+  const root = ReactDOM.createRoot(rootElement);
+  root.render(
+    <StrictMode>
       <RouterProvider router={router} />
-    </FirebaseAuthProvider>
-  </StrictMode>
-);
+    </StrictMode>
+  );
+}

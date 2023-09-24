@@ -24,24 +24,24 @@ const fetchSubTasks = async (subTaskIds: DocumentReference[]) => {
 
 type State =
   | {
-      visible: false;
-    }
+    visible: false;
+  }
   | {
-      visible: true;
-      text: string;
-    };
+    visible: true;
+    text: string;
+  };
 
 type Action =
   | {
-      type: 'OPEN';
-    }
+    type: 'OPEN';
+  }
   | {
-      type: 'CLOSE';
-    }
+    type: 'CLOSE';
+  }
   | {
-      type: 'CHANGE_TEXT';
-      text: string;
-    };
+    type: 'CHANGE_TEXT';
+    text: string;
+  };
 
 const reducer = (_state: State, action: Action): State => {
   switch (action.type) {
@@ -92,6 +92,23 @@ export const TaskModalDialog = forwardRef<HTMLDialogElement, Props>(
               ✕
             </button>
           </form>
+          <div className="flex gap-1 items-center cursor hover:underline">
+            親タスク
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-4 h-4"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M8.25 4.5l7.5 7.5-7.5 7.5"
+              />
+            </svg>
+          </div>
           <h3 className="font-bold text-lg flex gap-2 items-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
