@@ -1,215 +1,154 @@
-import {
-  DocumentReference,
-  DocumentSnapshot,
-  collection,
-  getDocs,
-} from 'firebase/firestore';
-import { User, onAuthStateChanged } from 'firebase/auth';
-import { firestore, auth } from '../../main';
-import { useLoaderData } from 'react-router-dom';
-import { Button } from 'lib/shared/ui';
-import { useReducer, useRef, useState } from 'react';
-
-// const getUserAsync = (): Promise<User | null> => {
-//   return new Promise((resolve) => {
-//     const unsubscribe = onAuthStateChanged(auth, (user) => {
-//       // user オブジェクトを resolve
-//       resolve(user);
-//       // 登録解除
-//       unsubscribe();
-//     });
-//   });
-// };
-//
-// async function fetchTasks(listRef: DocumentReference) {
-//   const tasksRef = collection(listRef, 'tasks');
-//   const taskSnapshots = await getDocs(tasksRef);
-//   const tasks = taskSnapshots.docs.map((doc) => ({
-//     id: doc.id,
-//     ...doc.data(),
-//   }));
-//   return tasks;
-// }
-//
-// async function fetchLists(boardDoc: DocumentSnapshot) {
-//   const listsRef = collection(boardDoc.ref, 'lists');
-//   const listSnapshots = await getDocs(listsRef);
-//   const lists = await Promise.all(
-//     listSnapshots.docs.map(async (doc) => {
-//       const tasks = await fetchTasks(doc.ref);
-//       return { id: doc.id, ...doc.data(), tasks };
-//     })
-//   );
-//   return lists;
-// }
-//
-// async function fetchBoards(user: User) {
-//   const boardRef = collection(
-//     firestore,
-//     'workspaces',
-//     user?.uid ?? '',
-//     'boards'
-//   );
-//   const boardSnapshots = await getDocs(boardRef);
-//   const boards = await Promise.all(
-//     boardSnapshots.docs.map(async (doc) => {
-//       const lists = await fetchLists(doc);
-//       return { id: doc.id, ...doc.data(), lists };
-//     })
-//   );
-//   return boards;
-// }
-//
-export const dashboardLoader = async () => {
-  // const user = await getUserAsync();
-  // if (!user) {
-  //   return;
-  // }
-  // return await fetchBoards(user);
-  return boards;
-};
-
-const boards = [
-  {
-    id: 'hsJDohDYDTcXxjXph69s',
-    name: 'マイタスク',
-    lists: [
-      {
-        id: 'YZnIZ46u6LWdCFeQxAaw',
-        name: 'inbox',
-        tasks: [
-          {
-            id: 'kchVwJoq98zxZJy9X7jC',
-            name: 'FocusBoardの使いかたについて知る',
-          },
-          {
-            id: 'kchVwJoq98zxZJy9X7jC-2',
-            name: 'エンジニアのための知的生産術を読む',
-          },
-        ],
-      },
-      {
-        id: 'h56UJFE4mYSioOGYAaBy',
-        name: '今日やること',
-        tasks: [],
-      },
-      {
-        id: 'h56UJFE4mYSioOGYAaBya',
-        name: '今日やること',
-        tasks: [],
-      },
-    ],
-  },
-  {
-    id: 'hsJDohDYDTcXxjXph69s',
-    name: '読書',
-    lists: [
-      {
-        id: 'YZnIZ46u6LWdCFeQxAaw',
-        name: 'inbox',
-        tasks: [
-          {
-            id: 'kchVwJoq98zxZJy9X7jC',
-            name: 'FocusBoardの使いかたについて知る',
-          },
-        ],
-      },
-      {
-        id: 'h56UJFE4mYSioOGYAaBy',
-        name: '今日やること',
-        tasks: [],
-      },
-    ],
-  },
-];
+import { Button, cn } from "lib/shared/ui";
+import { useReducer, useRef, useState } from "react";
+import { useParams } from "react-router-dom";
+import { TaskModalDialog } from "./components/task-modal-dialog";
+import { Board, Task } from "../feature/type";
+import { useUser } from "../feature/user-hook";
+import { useApiService } from "../feature/api-service-hook";
+import { DashboardProvider, useDashboard } from "./hooks/dashboard-state";
 
 type State =
   | {
-    visible: false;
-  }
+      visible: false;
+    }
   | {
-    visible: true;
-    listId: string;
-    text: string;
-  };
+      visible: true;
+      listId: string;
+      text: string;
+    };
 
 type Action =
   | {
-    type: 'OPEN';
-    listId: string;
-  }
+      type: "OPEN";
+      listId: string;
+    }
   | {
-    type: 'CLOSE';
-  }
+      type: "CLOSE";
+    }
   | {
-    type: 'CHANGE_TEXT';
-    text: string;
-  };
+      type: "CHANGE_TEXT";
+      text: string;
+    };
 
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
-    case 'OPEN':
+    case "OPEN":
       return {
         visible: true,
         listId: action.listId,
-        text: '',
+        text: "",
       };
-    case 'CLOSE':
+    case "CLOSE":
       return {
         visible: false,
       };
-    case 'CHANGE_TEXT':
+    case "CHANGE_TEXT":
       return {
         visible: true,
-        listId: state.visible ? state.listId : '',
+        listId: state.visible ? state.listId : "",
         text: action.text,
       };
   }
 };
 
-export function DashboardPage() {
-  // TODO: Recoil で管理する
-  const value = useLoaderData() as Awaited<ReturnType<typeof dashboardLoader>>;
-  // TODO: board を選択できるように、query params?
-  const board = value?.[0];
-
+const DashboardPagePresenter = ({
+  board,
+  addTask,
+  mutate,
+}: {
+  board: Board | undefined;
+  addTask: (...v: any) => void;
+  mutate: () => void;
+}) => {
   const taskModalDialogRef = useRef<HTMLDialogElement>(null);
 
   const [newTaskState, dispatchNewTaskState] = useReducer(reducer, {
     visible: false,
   });
+  const { dispatchDashboardState } = useDashboard();
+  const [showSubTask, setShowSubTask] = useState(false);
 
   return (
     <div>
       {/* toolbar */}
-      <div className="px-8 py-4 border-b flex justify-between">
-        <h1 className="text-lg font-bold">{board.name}</h1>
-        <Button as="button" className="btn-sm">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="w-4 h-4"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M3 7.5L7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5"
-            />
-          </svg>
-          ソート
-        </Button>
+      <div className="flex justify-between border-b px-8 py-4">
+        <h1 className="text-lg font-bold">{board?.name}</h1>
+        <div className="flex gap-2">
+          <label className="swap btn-sm btn">
+            <input type="checkbox" onChange={() => setShowSubTask((v) => !v)} />
+            <div className="swap-on flex items-center gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="h-6 w-6"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+              </svg>
+              サブタスクを表示
+            </div>
+            <div className="swap-off flex items-center gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="h-6 w-6"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"
+                />
+              </svg>
+              サブタスクを非表示
+            </div>
+          </label>
+          <Button as="button" className="btn-sm">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="h-4 w-4"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M3 7.5L7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5"
+              />
+            </svg>
+            ソート
+          </Button>
+        </div>
       </div>
       {/* board */}
-      <ul className="flex gap-4 p-4 w-screen overflow-x-auto">
+      <ul className="flex w-screen gap-4 overflow-x-auto p-4">
         {/* list */}
-        {board.lists.map((list) => (
-          <li key={list.id} className="min-w-[400px]">
+        {board?.lists?.map((list) => (
+          <li
+            key={list.id}
+            className="min-w-[400px]"
+            onClick={() =>
+              dispatchDashboardState({ type: "SELECT_LIST", list })
+            }
+          >
             <div className="flex justify-between">
               <p className="text-2xl">{list.name}</p>
-              <div className="grid gap-1 grid-cols-2">
+              <div className="grid grid-cols-2 gap-1">
                 <Button as="button" className="btn-square btn-sm">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -217,7 +156,7 @@ export function DashboardPage() {
                     viewBox="0 0 24 24"
                     strokeWidth={1.5}
                     stroke="currentColor"
-                    className="w-6 h-6"
+                    className="h-6 w-6"
                   >
                     <path
                       strokeLinecap="round"
@@ -226,7 +165,7 @@ export function DashboardPage() {
                     />
                   </svg>
                 </Button>
-                <div className="dropdown dropdown-end">
+                <div className="dropdown-end dropdown">
                   <label tabIndex={0}>
                     <Button as="button" className="btn-square btn-sm">
                       <svg
@@ -235,7 +174,7 @@ export function DashboardPage() {
                         viewBox="0 0 24 24"
                         strokeWidth={1.5}
                         stroke="currentColor"
-                        className="w-6 h-6"
+                        className="h-6 w-6"
                       >
                         <path
                           strokeLinecap="round"
@@ -247,7 +186,7 @@ export function DashboardPage() {
                   </label>
                   <ul
                     tabIndex={0}
-                    className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
+                    className="dropdown-content menu rounded-box z-[1] w-52 bg-base-100 p-2 shadow"
                   >
                     <li>
                       <button>
@@ -257,7 +196,7 @@ export function DashboardPage() {
                           viewBox="0 0 24 24"
                           strokeWidth={1.5}
                           stroke="currentColor"
-                          className="w-4 h-4"
+                          className="h-4 w-4"
                         >
                           <path
                             strokeLinecap="round"
@@ -276,7 +215,7 @@ export function DashboardPage() {
                           viewBox="0 0 24 24"
                           strokeWidth={1.5}
                           stroke="currentColor"
-                          className="w-4 h-4"
+                          className="h-4 w-4"
                         >
                           <path
                             strokeLinecap="round"
@@ -292,22 +231,31 @@ export function DashboardPage() {
               </div>
             </div>
             {/* cards */}
-            <ul className="grid gap-2 mt-4">
+            <ul className="mt-4 grid gap-2">
               {list.tasks.map((task) => (
-                <li key={task.id}>
+                <li
+                  key={task.id}
+                  className={showSubTask && task.isSubTask ? "hidden" : "block"}
+                >
                   <div
-                    className="card card-bordered rounded-md cursor-pointer"
-                    onClick={() => taskModalDialogRef.current?.showModal()}
+                    className={cn(
+                      "card-bordered card cursor-pointer rounded-md border-gray-200 shadow-sm",
+                      task.isSubTask && "border-gray-100",
+                    )}
+                    onClick={() => {
+                      dispatchDashboardState({ type: "SELECT_TASK", task });
+                      taskModalDialogRef.current?.showModal();
+                    }}
                   >
                     <div className="card-body">
-                      <p className="card-title font-normal text-lg">
+                      <p className="card-title text-lg font-normal">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           fill="none"
                           viewBox="0 0 24 24"
                           strokeWidth={1.5}
                           stroke="currentColor"
-                          className="w-6 h-6"
+                          className="h-6 w-6"
                         >
                           <path
                             strokeLinecap="round"
@@ -324,15 +272,15 @@ export function DashboardPage() {
               ))}
               {newTaskState.visible && newTaskState.listId === list.id && (
                 <li>
-                  <div className="card card-body card-bordered rounded-md cursor-pointer">
-                    <div className="flex gap-2 items-center">
+                  <div className="card-bordered card card-body cursor-pointer rounded-md">
+                    <div className="flex items-center gap-2">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"
                         strokeWidth={1.5}
                         stroke="currentColor"
-                        className="w-6 h-6"
+                        className="h-6 w-6"
                       >
                         <path
                           strokeLinecap="round"
@@ -342,26 +290,32 @@ export function DashboardPage() {
                       </svg>
                       <input
                         type="text"
-                        className="input w-full h-auto"
+                        className="input h-auto w-full"
                         placeholder="タスクを追加"
                         autoFocus
                         // フォーカスが外れたとき
-                        onBlur={() => {
+                        onBlur={async () => {
                           // 未入力のときはキャンセル
                           if (!newTaskState.text) {
                             return dispatchNewTaskState({
-                              type: 'CLOSE',
+                              type: "CLOSE",
                             });
                           }
                           // 入力されているときは追加
-                          // TODO: サーバーに追加
-                          // refetch するか state を更新するか
-                          // refetch のときは Recoil で管理する必要がある
+                          await addTask(board.id, list.id, {
+                            name: newTaskState.text,
+                            isSubTask: false,
+                          });
+                          // ローカルデータの更新
+                          mutate();
+                          dispatchNewTaskState({
+                            type: "CLOSE",
+                          });
                         }}
                         value={newTaskState.text}
                         onChange={(e) =>
                           dispatchNewTaskState({
-                            type: 'CHANGE_TEXT',
+                            type: "CHANGE_TEXT",
                             text: e.target.value,
                           })
                         }
@@ -377,7 +331,7 @@ export function DashboardPage() {
                   className="btn-block"
                   onClick={() =>
                     dispatchNewTaskState({
-                      type: 'OPEN',
+                      type: "OPEN",
                       listId: list.id,
                     })
                   }
@@ -388,7 +342,7 @@ export function DashboardPage() {
                     viewBox="0 0 24 24"
                     strokeWidth={1.5}
                     stroke="currentColor"
-                    className="w-6 h-6"
+                    className="h-6 w-6"
                   >
                     <path
                       strokeLinecap="round"
@@ -412,7 +366,7 @@ export function DashboardPage() {
                 viewBox="0 0 24 24"
                 strokeWidth={1.5}
                 stroke="currentColor"
-                className="w-6 h-6"
+                className="h-6 w-6"
               >
                 <path
                   strokeLinecap="round"
@@ -425,103 +379,30 @@ export function DashboardPage() {
           </div>
         </li>
       </ul>
-      {/* task modal-dialog */}
-      <dialog className="modal" ref={taskModalDialogRef}>
-        <div className="modal-box max-w-5xl">
-          <form method="dialog">
-            <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
-              ✕
-            </button>
-          </form>
-          <h3 className="font-bold text-lg flex gap-2 items-center">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="w-6 h-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            FocusBoardの使い方を知ろう
-          </h3>
-          <ul className="grid gap-2 mt-4">
-            <li className="grid grid-cols-[100px_1fr] gap-4">
-              <p className="text-gray-500">期日</p>
-              <p>9月1日</p>
-            </li>
-            <li className="grid grid-cols-[100px_1fr] gap-4">
-              <p className="text-gray-500">説明</p>
-              <div>
-                <p>マイタスクへようこそ！</p>
-                <p>
-                  マイタスクは自分に割り当てられたすべてのタスクが表示される個人用の計画スペースです。マイタスクでは以下のことができます。
-                </p>
-                <p>
-                  セクションを使ってタスクを計画したり整理したりします
-                  To-Doを記録および管理します
-                </p>
-                <p>期日やプロジェクト、優先度でタスクをソートします</p>
-              </div>
-            </li>
-          </ul>
-          <div className="mt-4">
-            <p className="text-gray-500">サブタスク</p>
-            <ul className="grid gap-2 mt-2">
-              <li>
-                <div className="border-t border-b py-2 border-gray-500 cursor-pointer">
-                  <p className="flex gap-2">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="w-6 h-6"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    FocusBoardアカウントを作成しよう
-                  </p>
-                </div>
-              </li>
-              <li>
-                <div className="border-b py-2 border-gray-500 cursor-pointer">
-                  <p className="flex gap-2">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="w-6 h-6"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    タスクを登録してみよう
-                  </p>
-                </div>
-              </li>
-            </ul>
-            <Button as="button" className="btn-sm mt-4">
-              サブタスクを追加
-            </Button>
-          </div>
-        </div>
-      </dialog>
+      <TaskModalDialog
+        ref={taskModalDialogRef}
+        boardId={board?.id ?? ""}
+        handleSelectSubTask={(selectedSubTask: Task) => {
+          dispatchDashboardState({
+            type: "SELECT_TASK",
+            task: selectedSubTask,
+          });
+        }}
+      />
     </div>
+  );
+};
+export function DashboardPage() {
+  const { id } = useParams();
+  const { currentUser } = useUser();
+  const { useBoard, useAddTask } = useApiService();
+  const { data: board, mutate } = useBoard(currentUser, id as string);
+  const { addTask } = useAddTask(currentUser);
+
+  // TODO: mutate は useTask の callback に渡す
+  return (
+    <DashboardProvider>
+      <DashboardPagePresenter board={board} addTask={addTask} mutate={mutate} />
+    </DashboardProvider>
   );
 }

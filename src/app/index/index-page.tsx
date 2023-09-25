@@ -1,4 +1,4 @@
-import { Button } from 'lib/shared/ui';
+import { Button } from "lib/shared/ui";
 
 export function IndexPage() {
   return (
@@ -6,9 +6,6 @@ export function IndexPage() {
       <p>Index page</p>
       <Button as="link" to="/login">
         ログイン
-      </Button>
-      <Button as="link" to="/dashboard">
-        ダッシュボード
       </Button>
     </div>
   );

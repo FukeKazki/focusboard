@@ -2,12 +2,12 @@ export function Header() {
   return (
     <div className="navbar bg-base-100">
       <div className="flex-none">
-        <label className="btn btn-square btn-ghost" htmlFor="my-drawer-3">
+        <label className="btn-ghost btn-square btn" htmlFor="my-drawer-3">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
-            className="inline-block w-5 h-5 stroke-current"
+            className="inline-block h-5 w-5 stroke-current"
           >
             <path
               strokeLinecap="round"
@@ -19,12 +19,12 @@ export function Header() {
         </label>
       </div>
       <div className="flex-1">
-        <a className="btn btn-ghost normal-case text-xl" href="/">
+        <a className="btn-ghost btn text-xl normal-case" href="/">
           Focus Board
         </a>
       </div>
-      <div className="dropdown dropdown-end">
-        <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
+      <div className="dropdown-end dropdown">
+        <label tabIndex={0} className="btn-ghost btn-circle avatar btn">
           <div className="w-10 rounded-full">
             <img
               src="https://avatars.githubusercontent.com/u/40536586?v=4"
@@ -34,7 +34,7 @@ export function Header() {
         </label>
         <ul
           tabIndex={0}
-          className="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52"
+          className="dropdown-content menu rounded-box menu-sm z-[1] mt-3 w-52 bg-base-100 p-2 shadow"
         >
           <li>
             <a href="/">Settings</a>
