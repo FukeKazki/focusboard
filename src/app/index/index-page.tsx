@@ -1,4 +1,4 @@
-import { Button } from 'lib/shared/ui';
+import { Button } from "lib/shared/ui";
 
 export function IndexPage() {
   return (

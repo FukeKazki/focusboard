@@ -1,51 +1,51 @@
-import { Button, cn } from 'lib/shared/ui';
-import { useReducer, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { TaskModalDialog } from './components/task-modal-dialog';
-import { Board, Task } from '../feature/type';
-import { useUser } from '../feature/user-hook';
-import { useApiService } from '../feature/api-service-hook';
-import { DashboardProvider, useDashboard } from './hooks/dashboard-state';
+import { Button, cn } from "lib/shared/ui";
+import { useReducer, useRef, useState } from "react";
+import { useParams } from "react-router-dom";
+import { TaskModalDialog } from "./components/task-modal-dialog";
+import { Board, Task } from "../feature/type";
+import { useUser } from "../feature/user-hook";
+import { useApiService } from "../feature/api-service-hook";
+import { DashboardProvider, useDashboard } from "./hooks/dashboard-state";
 
 type State =
   | {
-      visible: false;
-    }
+    visible: false;
+  }
   | {
-      visible: true;
-      listId: string;
-      text: string;
-    };
+    visible: true;
+    listId: string;
+    text: string;
+  };
 
 type Action =
   | {
-      type: 'OPEN';
-      listId: string;
-    }
+    type: "OPEN";
+    listId: string;
+  }
   | {
-      type: 'CLOSE';
-    }
+    type: "CLOSE";
+  }
   | {
-      type: 'CHANGE_TEXT';
-      text: string;
-    };
+    type: "CHANGE_TEXT";
+    text: string;
+  };
 
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
-    case 'OPEN':
+    case "OPEN":
       return {
         visible: true,
         listId: action.listId,
-        text: '',
+        text: "",
       };
-    case 'CLOSE':
+    case "CLOSE":
       return {
         visible: false,
       };
-    case 'CHANGE_TEXT':
+    case "CHANGE_TEXT":
       return {
         visible: true,
-        listId: state.visible ? state.listId : '',
+        listId: state.visible ? state.listId : "",
         text: action.text,
       };
   }
@@ -143,7 +143,7 @@ const DashboardPagePresenter = ({
             key={list.id}
             className="min-w-[400px]"
             onClick={() =>
-              dispatchDashboardState({ type: 'SELECT_LIST', list })
+              dispatchDashboardState({ type: "SELECT_LIST", list })
             }
           >
             <div className="flex justify-between">
@@ -235,15 +235,15 @@ const DashboardPagePresenter = ({
               {list.tasks.map((task) => (
                 <li
                   key={task.id}
-                  className={showSubTask && task.isSubTask ? 'hidden' : 'block'}
+                  className={showSubTask && task.isSubTask ? "hidden" : "block"}
                 >
                   <div
                     className={cn(
-                      'card card-bordered rounded-md cursor-pointer border-gray-200 shadow-sm',
-                      task.isSubTask && 'border-gray-100'
+                      "card card-bordered rounded-md cursor-pointer border-gray-200 shadow-sm",
+                      task.isSubTask && "border-gray-100"
                     )}
                     onClick={() => {
-                      dispatchDashboardState({ type: 'SELECT_TASK', task });
+                      dispatchDashboardState({ type: "SELECT_TASK", task });
                       taskModalDialogRef.current?.showModal();
                     }}
                   >
@@ -298,7 +298,7 @@ const DashboardPagePresenter = ({
                           // 未入力のときはキャンセル
                           if (!newTaskState.text) {
                             return dispatchNewTaskState({
-                              type: 'CLOSE',
+                              type: "CLOSE",
                             });
                           }
                           // 入力されているときは追加
@@ -309,13 +309,13 @@ const DashboardPagePresenter = ({
                           // ローカルデータの更新
                           mutate();
                           dispatchNewTaskState({
-                            type: 'CLOSE',
+                            type: "CLOSE",
                           });
                         }}
                         value={newTaskState.text}
                         onChange={(e) =>
                           dispatchNewTaskState({
-                            type: 'CHANGE_TEXT',
+                            type: "CHANGE_TEXT",
                             text: e.target.value,
                           })
                         }
@@ -331,7 +331,7 @@ const DashboardPagePresenter = ({
                   className="btn-block"
                   onClick={() =>
                     dispatchNewTaskState({
-                      type: 'OPEN',
+                      type: "OPEN",
                       listId: list.id,
                     })
                   }
@@ -381,10 +381,10 @@ const DashboardPagePresenter = ({
       </ul>
       <TaskModalDialog
         ref={taskModalDialogRef}
-        boardId={board?.id ?? ''}
+        boardId={board?.id ?? ""}
         handleSelectSubTask={(selectedSubTask: Task) => {
           dispatchDashboardState({
-            type: 'SELECT_TASK',
+            type: "SELECT_TASK",
             task: selectedSubTask,
           });
         }}

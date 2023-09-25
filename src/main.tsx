@@ -1,16 +1,16 @@
-import { StrictMode } from 'react';
-import * as ReactDOM from 'react-dom/client';
-import App from './app/app';
-import { RouterProvider, createBrowserRouter } from 'react-router-dom';
-import { IndexPage } from './app/index/index-page';
-import { LoginPage } from './app/login/login-page';
-import { DashboardPage } from './app/dashboard/dashboard-page';
-import { ErrorPage } from './app/error/error-page';
-import { FirebaseAuthProvider } from './app/feature/user-hook';
+import { StrictMode } from "react";
+import * as ReactDOM from "react-dom/client";
+import App from "./app/app";
+import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import { IndexPage } from "./app/index/index-page";
+import { LoginPage } from "./app/login/login-page";
+import { DashboardPage } from "./app/dashboard/dashboard-page";
+import { ErrorPage } from "./app/error/error-page";
+import { FirebaseAuthProvider } from "./app/feature/user-hook";
 
 const router = createBrowserRouter([
   {
-    path: '/',
+    path: "/",
     element: (
       <FirebaseAuthProvider>
         <App />
@@ -18,15 +18,15 @@ const router = createBrowserRouter([
     ),
     children: [
       {
-        path: '',
+        path: "",
         element: <IndexPage />,
       },
       {
-        path: 'login',
+        path: "login",
         element: <LoginPage />,
       },
       {
-        path: 'dashboard/:id',
+        path: "dashboard/:id",
         element: <DashboardPage />,
       },
     ],
@@ -34,7 +34,7 @@ const router = createBrowserRouter([
   },
 ]);
 
-const rootElement = document.getElementById('root');
+const rootElement = document.getElementById("root");
 if (rootElement !== null) {
   const root = ReactDOM.createRoot(rootElement);
   root.render(

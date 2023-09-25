@@ -1,5 +1,5 @@
-import { createContext, useContext, useReducer } from 'react';
-import { List, Task } from '../../feature/type';
+import { createContext, useContext, useReducer } from "react";
+import { List, Task } from "../../feature/type";
 
 type State = {
   selectedTask: Task | undefined;
@@ -8,38 +8,38 @@ type State = {
 
 type Action =
   | {
-      type: 'SELECT_TASK';
+      type: "SELECT_TASK";
       task: Task;
     }
   | {
-      type: 'UNSELECT_TASK';
+      type: "UNSELECT_TASK";
     }
   | {
-      type: 'SELECT_LIST';
+      type: "SELECT_LIST";
       list: List;
     }
   | {
-      type: 'UNSELECT_LIST';
+      type: "UNSELECT_LIST";
     };
 
 export const dashboardReducer = (state: State, action: Action): State => {
   switch (action.type) {
-    case 'SELECT_TASK':
+    case "SELECT_TASK":
       return {
         ...state,
         selectedTask: action.task,
       };
-    case 'UNSELECT_TASK':
+    case "UNSELECT_TASK":
       return {
         ...state,
         selectedTask: undefined,
       };
-    case 'SELECT_LIST':
+    case "SELECT_LIST":
       return {
         ...state,
         selectedList: action.list,
       };
-    case 'UNSELECT_LIST':
+    case "UNSELECT_LIST":
       return {
         ...state,
         selectedList: undefined,

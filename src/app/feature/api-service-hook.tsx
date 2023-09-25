@@ -1,4 +1,4 @@
-import { User } from 'firebase/auth';
+import { User } from "firebase/auth";
 import {
   DocumentReference,
   DocumentSnapshot,
@@ -10,10 +10,10 @@ import {
   getDoc,
   getDocs,
   updateDoc,
-} from 'firebase/firestore';
-import { Board, Task } from './type';
-import useSWR from 'swr';
-import { firestore } from '../lib/firebase';
+} from "firebase/firestore";
+import { Board, Task } from "./type";
+import useSWR from "swr";
+import { firestore } from "../lib/firebase";
 
 class ApiService {
   firestore: Firestore;
@@ -25,9 +25,9 @@ class ApiService {
   async fetchBoards(user: User) {
     const boardRef = collection(
       this.firestore,
-      'workspaces',
-      user.uid ?? '',
-      'boards'
+      "workspaces",
+      user.uid ?? "",
+      "boards"
     );
     const boardSnapshots = await getDocs(boardRef);
     const boards = await Promise.all(
@@ -48,13 +48,13 @@ class ApiService {
   ) {
     const ref = doc(
       this.firestore,
-      'workspaces',
+      "workspaces",
       user.uid,
-      'boards',
+      "boards",
       input.boardId,
-      'lists',
+      "lists",
       input.listId,
-      'tasks',
+      "tasks",
       input.taskId
     );
     const taskRef = await getDoc(ref);
@@ -62,13 +62,13 @@ class ApiService {
   }
 
   async fetchBoard(user: User, boardId: string) {
-    const ref = doc(this.firestore, 'workspaces', user.uid, 'boards', boardId);
+    const ref = doc(this.firestore, "workspaces", user.uid, "boards", boardId);
     const boardRef = await getDoc(ref);
     const lists = await this.fetchLists(boardRef);
     return { id: boardRef.id, ...boardRef.data(), lists } as Board;
   }
   private async fetchLists(boardDoc: DocumentSnapshot) {
-    const listsRef = collection(boardDoc.ref, 'lists');
+    const listsRef = collection(boardDoc.ref, "lists");
     const listSnapshots = await getDocs(listsRef);
     const lists = await Promise.all(
       listSnapshots.docs.map(async (doc) => {
@@ -79,7 +79,7 @@ class ApiService {
     return lists;
   }
   private async fetchTasks(listRef: DocumentReference) {
-    const tasksRef = collection(listRef, 'tasks');
+    const tasksRef = collection(listRef, "tasks");
     // const q = query(tasksRef, where('isSubTask', '==', false));
     // subTask除外する
     const taskSnapshots = await getDocs(tasksRef);
@@ -93,13 +93,13 @@ class ApiService {
   async addTask(user: User, boardId: string, listId: string, input: any) {
     const boardRef = collection(
       firestore,
-      'workspaces',
-      user.uid ?? '',
-      'boards',
+      "workspaces",
+      user.uid ?? "",
+      "boards",
       boardId,
-      'lists',
+      "lists",
       listId,
-      'tasks'
+      "tasks"
     );
     return await addDoc(boardRef, input);
   }
@@ -113,13 +113,13 @@ class ApiService {
   ) {
     const taskRef = doc(
       this.firestore,
-      'workspaces',
+      "workspaces",
       user.uid,
-      'boards',
+      "boards",
       boardId,
-      'lists',
+      "lists",
       listId,
-      'tasks',
+      "tasks",
       taskId
     );
     await updateDoc(taskRef, input);
@@ -138,13 +138,13 @@ class ApiService {
       ...input,
       parent: doc(
         this.firestore,
-        'workspaces',
+        "workspaces",
         user.uid,
-        'boards',
+        "boards",
         boardId,
-        'lists',
+        "lists",
         listId,
-        'tasks',
+        "tasks",
         input.parent
       ),
       isSubTask: true,
@@ -161,7 +161,7 @@ export const useApiService = () => {
 
   const useBoards = (user: User | null | undefined) =>
     useSWR(
-      ['boards', user],
+      ["boards", user],
       () => {
         if (!user) {
           return;
@@ -178,7 +178,7 @@ export const useApiService = () => {
     input: { boardId: string; listId: string; taskId: string }
   ) => {
     return useSWR(
-      ['task', user, input.boardId, input.listId, input.taskId],
+      ["task", user, input.boardId, input.listId, input.taskId],
       async () => {
         if (!user) {
           return;
@@ -193,7 +193,7 @@ export const useApiService = () => {
 
   const useBoard = (user: User | null | undefined, boardId: string) => {
     return useSWR(
-      ['board', user, boardId],
+      ["board", user, boardId],
       async () => {
         if (!user) {
           return;

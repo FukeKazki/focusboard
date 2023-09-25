@@ -1,16 +1,16 @@
-import { Button } from 'lib/shared/ui';
-import { ComponentPropsWithoutRef, forwardRef, useReducer } from 'react';
-import useSWR from 'swr';
-import { DocumentReference, getDoc } from 'firebase/firestore';
-import { Task } from '../../feature/type';
-import { useUser } from '../../feature/user-hook';
-import { useApiService } from '../../feature/api-service-hook';
-import { useDashboard } from '../hooks/dashboard-state';
+import { Button } from "lib/shared/ui";
+import { ComponentPropsWithoutRef, forwardRef, useReducer } from "react";
+import useSWR from "swr";
+import { DocumentReference, getDoc } from "firebase/firestore";
+import { Task } from "../../feature/type";
+import { useUser } from "../../feature/user-hook";
+import { useApiService } from "../../feature/api-service-hook";
+import { useDashboard } from "../hooks/dashboard-state";
 
 type Props = {
   boardId: string;
   handleSelectSubTask: (subTask: Task) => void;
-} & ComponentPropsWithoutRef<'dialog'>;
+} & ComponentPropsWithoutRef<"dialog">;
 
 const fetchSubTasks = async (subTaskIds: DocumentReference[]) => {
   const subTasks = await Promise.all(
@@ -24,37 +24,37 @@ const fetchSubTasks = async (subTaskIds: DocumentReference[]) => {
 
 type State =
   | {
-    visible: false;
-  }
+      visible: false;
+    }
   | {
-    visible: true;
-    text: string;
-  };
+      visible: true;
+      text: string;
+    };
 
 type Action =
   | {
-    type: 'OPEN';
-  }
+      type: "OPEN";
+    }
   | {
-    type: 'CLOSE';
-  }
+      type: "CLOSE";
+    }
   | {
-    type: 'CHANGE_TEXT';
-    text: string;
-  };
+      type: "CHANGE_TEXT";
+      text: string;
+    };
 
 const reducer = (_state: State, action: Action): State => {
   switch (action.type) {
-    case 'OPEN':
+    case "OPEN":
       return {
         visible: true,
-        text: '',
+        text: "",
       };
-    case 'CLOSE':
+    case "CLOSE":
       return {
         visible: false,
       };
-    case 'CHANGE_TEXT':
+    case "CHANGE_TEXT":
       return {
         visible: true,
         text: action.text,
@@ -69,13 +69,13 @@ export const TaskModalDialog = forwardRef<HTMLDialogElement, Props>(
     const { useTask, useAddSubTask } = useApiService();
     const { data, mutate: mutateTask } = useTask(currentUser, {
       boardId: boardId,
-      listId: dashboardState.selectedList?.id ?? '',
-      taskId: dashboardState.selectedTask?.id ?? '',
+      listId: dashboardState.selectedList?.id ?? "",
+      taskId: dashboardState.selectedTask?.id ?? "",
     });
     const { addSubTask } = useAddSubTask(currentUser);
 
     const { data: subTasks } = useSWR(
-      () => ['subTasks/?id=' + data?.id ?? null, data?.children ?? []],
+      () => ["subTasks/?id=" + data?.id ?? null, data?.children ?? []],
       async () => {
         return fetchSubTasks(data?.children ?? []);
       }
@@ -205,7 +205,7 @@ export const TaskModalDialog = forwardRef<HTMLDialogElement, Props>(
                           // 未入力のときはキャンセル
                           if (!newTaskState.text) {
                             return dispatchNewTaskState({
-                              type: 'CLOSE',
+                              type: "CLOSE",
                             });
                           }
                           if (!dashboardState.selectedList?.id) {
@@ -226,13 +226,13 @@ export const TaskModalDialog = forwardRef<HTMLDialogElement, Props>(
                           // ローカルデータの更新
                           mutateTask();
                           dispatchNewTaskState({
-                            type: 'CLOSE',
+                            type: "CLOSE",
                           });
                         }}
                         value={newTaskState.text}
                         onChange={(e) =>
                           dispatchNewTaskState({
-                            type: 'CHANGE_TEXT',
+                            type: "CHANGE_TEXT",
                             text: e.target.value,
                           })
                         }
@@ -247,7 +247,7 @@ export const TaskModalDialog = forwardRef<HTMLDialogElement, Props>(
               className="btn-sm mt-4"
               onClick={async () => {
                 dispatchNewTaskState({
-                  type: 'OPEN',
+                  type: "OPEN",
                 });
               }}
             >
