@@ -17,7 +17,7 @@ const fetchSubTasks = async (subTaskIds: DocumentReference[]) => {
     subTaskIds.map(async (subTaskId) => {
       const subTaskRef = await getDoc(subTaskId);
       return { id: subTaskRef.id, ...subTaskRef.data() } as Task;
-    })
+    }),
   );
   return subTasks;
 };
@@ -78,7 +78,7 @@ export const TaskModalDialog = forwardRef<HTMLDialogElement, Props>(
       () => ["subTasks/?id=" + data?.id ?? null, data?.children ?? []],
       async () => {
         return fetchSubTasks(data?.children ?? []);
-      }
+      },
     );
     const [newTaskState, dispatchNewTaskState] = useReducer(reducer, {
       visible: false,
@@ -88,12 +88,12 @@ export const TaskModalDialog = forwardRef<HTMLDialogElement, Props>(
       <dialog className="modal" ref={ref} {...props}>
         <div className="modal-box max-w-5xl">
           <form method="dialog">
-            <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+            <button className="btn-ghost btn-sm btn-circle btn absolute right-2 top-2">
               ✕
             </button>
           </form>
           {data?.parent && (
-            <div className="flex gap-1 items-center cursor-pointer text-gray-500 hover:underline mb-1">
+            <div className="mb-1 flex cursor-pointer items-center gap-1 text-gray-500 hover:underline">
               {data.parent.id}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -101,7 +101,7 @@ export const TaskModalDialog = forwardRef<HTMLDialogElement, Props>(
                 viewBox="0 0 24 24"
                 strokeWidth={1.5}
                 stroke="currentColor"
-                className="w-4 h-4"
+                className="h-4 w-4"
               >
                 <path
                   strokeLinecap="round"
@@ -111,14 +111,14 @@ export const TaskModalDialog = forwardRef<HTMLDialogElement, Props>(
               </svg>
             </div>
           )}
-          <h3 className="font-bold text-lg flex gap-2 items-center">
+          <h3 className="flex items-center gap-2 text-lg font-bold">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
               strokeWidth={1.5}
               stroke="currentColor"
-              className="w-6 h-6"
+              className="h-6 w-6"
             >
               <path
                 strokeLinecap="round"
@@ -128,7 +128,7 @@ export const TaskModalDialog = forwardRef<HTMLDialogElement, Props>(
             </svg>
             {data?.name}
           </h3>
-          <ul className="grid gap-2 mt-4">
+          <ul className="mt-4 grid gap-2">
             <li className="grid grid-cols-[100px_1fr] gap-4">
               <p className="text-gray-500">期日</p>
               <p>9月1日</p>
@@ -150,13 +150,13 @@ export const TaskModalDialog = forwardRef<HTMLDialogElement, Props>(
           </ul>
           <div className="mt-4">
             <p className="text-gray-500">サブタスク</p>
-            <ul className="grid gap-2 mt-2">
+            <ul className="mt-2 grid gap-2">
               {subTasks?.map((subTask) => (
                 <li
                   key={subTask.id}
                   onClick={() => handleSelectSubTask(subTask)}
                 >
-                  <div className="border-t border-b py-2 border-gray-500 cursor-pointer">
+                  <div className="cursor-pointer border-t border-b border-gray-500 py-2">
                     <p className="flex gap-2">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -164,7 +164,7 @@ export const TaskModalDialog = forwardRef<HTMLDialogElement, Props>(
                         viewBox="0 0 24 24"
                         strokeWidth={1.5}
                         stroke="currentColor"
-                        className="w-6 h-6"
+                        className="h-6 w-6"
                       >
                         <path
                           strokeLinecap="round"
@@ -179,7 +179,7 @@ export const TaskModalDialog = forwardRef<HTMLDialogElement, Props>(
               ))}
               {newTaskState.visible && (
                 <li>
-                  <div className="border-t border-b py-2 border-gray-500 cursor-pointer">
+                  <div className="cursor-pointer border-t border-b border-gray-500 py-2">
                     <p className="flex gap-2">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -187,7 +187,7 @@ export const TaskModalDialog = forwardRef<HTMLDialogElement, Props>(
                         viewBox="0 0 24 24"
                         strokeWidth={1.5}
                         stroke="currentColor"
-                        className="w-6 h-6"
+                        className="h-6 w-6"
                       >
                         <path
                           strokeLinecap="round"
@@ -197,7 +197,7 @@ export const TaskModalDialog = forwardRef<HTMLDialogElement, Props>(
                       </svg>
                       <input
                         type="text"
-                        className="input w-full h-auto"
+                        className="input h-auto w-full"
                         placeholder="タスクを追加"
                         autoFocus
                         // フォーカスが外れたとき
@@ -221,7 +221,7 @@ export const TaskModalDialog = forwardRef<HTMLDialogElement, Props>(
                             {
                               name: newTaskState.text,
                               parent: dashboardState.selectedTask.id,
-                            }
+                            },
                           );
                           // ローカルデータの更新
                           mutateTask();
@@ -257,5 +257,5 @@ export const TaskModalDialog = forwardRef<HTMLDialogElement, Props>(
         </div>
       </dialog>
     );
-  }
+  },
 );

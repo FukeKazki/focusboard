@@ -16,7 +16,7 @@ type Props = {
 
 export const FirebaseAuthProvider: React.FC<Props> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null | undefined>(
-    undefined
+    undefined,
   );
 
   useEffect(() => {

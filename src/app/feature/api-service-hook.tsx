@@ -27,13 +27,13 @@ class ApiService {
       this.firestore,
       "workspaces",
       user.uid ?? "",
-      "boards"
+      "boards",
     );
     const boardSnapshots = await getDocs(boardRef);
     const boards = await Promise.all(
       boardSnapshots.docs.map(async (doc) => {
         return { id: doc.id, ...doc.data() } as Board;
-      })
+      }),
     );
     return boards;
   }
@@ -44,7 +44,7 @@ class ApiService {
       boardId: string;
       listId: string;
       taskId: string;
-    }
+    },
   ) {
     const ref = doc(
       this.firestore,
@@ -55,7 +55,7 @@ class ApiService {
       "lists",
       input.listId,
       "tasks",
-      input.taskId
+      input.taskId,
     );
     const taskRef = await getDoc(ref);
     return { id: taskRef.id, ...taskRef.data() } as Task;
@@ -74,7 +74,7 @@ class ApiService {
       listSnapshots.docs.map(async (doc) => {
         const tasks = await this.fetchTasks(doc.ref);
         return { id: doc.id, ...doc.data(), tasks };
-      })
+      }),
     );
     return lists;
   }
@@ -99,7 +99,7 @@ class ApiService {
       boardId,
       "lists",
       listId,
-      "tasks"
+      "tasks",
     );
     return await addDoc(boardRef, input);
   }
@@ -109,7 +109,7 @@ class ApiService {
     boardId: string,
     listId: string,
     taskId: string,
-    input: any
+    input: any,
   ) {
     const taskRef = doc(
       this.firestore,
@@ -120,7 +120,7 @@ class ApiService {
       "lists",
       listId,
       "tasks",
-      taskId
+      taskId,
     );
     await updateDoc(taskRef, input);
   }
@@ -132,7 +132,7 @@ class ApiService {
     input: {
       name: string;
       parent: string;
-    }
+    },
   ) {
     const res = await this.addTask(user, boardId, listId, {
       ...input,
@@ -145,7 +145,7 @@ class ApiService {
         "lists",
         listId,
         "tasks",
-        input.parent
+        input.parent,
       ),
       isSubTask: true,
     });
@@ -170,12 +170,12 @@ export const useApiService = () => {
       },
       {
         revalidateOnFocus: false,
-      }
+      },
     );
 
   const useTask = (
     user: User | null | undefined,
-    input: { boardId: string; listId: string; taskId: string }
+    input: { boardId: string; listId: string; taskId: string },
   ) => {
     return useSWR(
       ["task", user, input.boardId, input.listId, input.taskId],
@@ -187,7 +187,7 @@ export const useApiService = () => {
       },
       {
         revalidateOnFocus: false,
-      }
+      },
     );
   };
 
@@ -202,7 +202,7 @@ export const useApiService = () => {
       },
       {
         revalidateOnFocus: false,
-      }
+      },
     );
   };
 

@@ -9,26 +9,26 @@ import { DashboardProvider, useDashboard } from "./hooks/dashboard-state";
 
 type State =
   | {
-    visible: false;
-  }
+      visible: false;
+    }
   | {
-    visible: true;
-    listId: string;
-    text: string;
-  };
+      visible: true;
+      listId: string;
+      text: string;
+    };
 
 type Action =
   | {
-    type: "OPEN";
-    listId: string;
-  }
+      type: "OPEN";
+      listId: string;
+    }
   | {
-    type: "CLOSE";
-  }
+      type: "CLOSE";
+    }
   | {
-    type: "CHANGE_TEXT";
-    text: string;
-  };
+      type: "CHANGE_TEXT";
+      text: string;
+    };
 
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -71,19 +71,19 @@ const DashboardPagePresenter = ({
   return (
     <div>
       {/* toolbar */}
-      <div className="px-8 py-4 border-b flex justify-between">
+      <div className="flex justify-between border-b px-8 py-4">
         <h1 className="text-lg font-bold">{board?.name}</h1>
         <div className="flex gap-2">
-          <label className="swap btn btn-sm">
+          <label className="swap btn-sm btn">
             <input type="checkbox" onChange={() => setShowSubTask((v) => !v)} />
-            <div className="swap-on flex gap-2 items-center">
+            <div className="swap-on flex items-center gap-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
                 strokeWidth={1.5}
                 stroke="currentColor"
-                className="w-6 h-6"
+                className="h-6 w-6"
               >
                 <path
                   strokeLinecap="round"
@@ -98,14 +98,14 @@ const DashboardPagePresenter = ({
               </svg>
               サブタスクを表示
             </div>
-            <div className="swap-off flex gap-2 items-center">
+            <div className="swap-off flex items-center gap-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
                 strokeWidth={1.5}
                 stroke="currentColor"
-                className="w-6 h-6"
+                className="h-6 w-6"
               >
                 <path
                   strokeLinecap="round"
@@ -123,7 +123,7 @@ const DashboardPagePresenter = ({
               viewBox="0 0 24 24"
               strokeWidth={1.5}
               stroke="currentColor"
-              className="w-4 h-4"
+              className="h-4 w-4"
             >
               <path
                 strokeLinecap="round"
@@ -136,7 +136,7 @@ const DashboardPagePresenter = ({
         </div>
       </div>
       {/* board */}
-      <ul className="flex gap-4 p-4 w-screen overflow-x-auto">
+      <ul className="flex w-screen gap-4 overflow-x-auto p-4">
         {/* list */}
         {board?.lists?.map((list) => (
           <li
@@ -148,7 +148,7 @@ const DashboardPagePresenter = ({
           >
             <div className="flex justify-between">
               <p className="text-2xl">{list.name}</p>
-              <div className="grid gap-1 grid-cols-2">
+              <div className="grid grid-cols-2 gap-1">
                 <Button as="button" className="btn-square btn-sm">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -156,7 +156,7 @@ const DashboardPagePresenter = ({
                     viewBox="0 0 24 24"
                     strokeWidth={1.5}
                     stroke="currentColor"
-                    className="w-6 h-6"
+                    className="h-6 w-6"
                   >
                     <path
                       strokeLinecap="round"
@@ -165,7 +165,7 @@ const DashboardPagePresenter = ({
                     />
                   </svg>
                 </Button>
-                <div className="dropdown dropdown-end">
+                <div className="dropdown-end dropdown">
                   <label tabIndex={0}>
                     <Button as="button" className="btn-square btn-sm">
                       <svg
@@ -174,7 +174,7 @@ const DashboardPagePresenter = ({
                         viewBox="0 0 24 24"
                         strokeWidth={1.5}
                         stroke="currentColor"
-                        className="w-6 h-6"
+                        className="h-6 w-6"
                       >
                         <path
                           strokeLinecap="round"
@@ -186,7 +186,7 @@ const DashboardPagePresenter = ({
                   </label>
                   <ul
                     tabIndex={0}
-                    className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
+                    className="dropdown-content menu rounded-box z-[1] w-52 bg-base-100 p-2 shadow"
                   >
                     <li>
                       <button>
@@ -196,7 +196,7 @@ const DashboardPagePresenter = ({
                           viewBox="0 0 24 24"
                           strokeWidth={1.5}
                           stroke="currentColor"
-                          className="w-4 h-4"
+                          className="h-4 w-4"
                         >
                           <path
                             strokeLinecap="round"
@@ -215,7 +215,7 @@ const DashboardPagePresenter = ({
                           viewBox="0 0 24 24"
                           strokeWidth={1.5}
                           stroke="currentColor"
-                          className="w-4 h-4"
+                          className="h-4 w-4"
                         >
                           <path
                             strokeLinecap="round"
@@ -231,7 +231,7 @@ const DashboardPagePresenter = ({
               </div>
             </div>
             {/* cards */}
-            <ul className="grid gap-2 mt-4">
+            <ul className="mt-4 grid gap-2">
               {list.tasks.map((task) => (
                 <li
                   key={task.id}
@@ -239,8 +239,8 @@ const DashboardPagePresenter = ({
                 >
                   <div
                     className={cn(
-                      "card card-bordered rounded-md cursor-pointer border-gray-200 shadow-sm",
-                      task.isSubTask && "border-gray-100"
+                      "card-bordered card cursor-pointer rounded-md border-gray-200 shadow-sm",
+                      task.isSubTask && "border-gray-100",
                     )}
                     onClick={() => {
                       dispatchDashboardState({ type: "SELECT_TASK", task });
@@ -248,14 +248,14 @@ const DashboardPagePresenter = ({
                     }}
                   >
                     <div className="card-body">
-                      <p className="card-title font-normal text-lg">
+                      <p className="card-title text-lg font-normal">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           fill="none"
                           viewBox="0 0 24 24"
                           strokeWidth={1.5}
                           stroke="currentColor"
-                          className="w-6 h-6"
+                          className="h-6 w-6"
                         >
                           <path
                             strokeLinecap="round"
@@ -272,15 +272,15 @@ const DashboardPagePresenter = ({
               ))}
               {newTaskState.visible && newTaskState.listId === list.id && (
                 <li>
-                  <div className="card card-body card-bordered rounded-md cursor-pointer">
-                    <div className="flex gap-2 items-center">
+                  <div className="card-bordered card card-body cursor-pointer rounded-md">
+                    <div className="flex items-center gap-2">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"
                         strokeWidth={1.5}
                         stroke="currentColor"
-                        className="w-6 h-6"
+                        className="h-6 w-6"
                       >
                         <path
                           strokeLinecap="round"
@@ -290,7 +290,7 @@ const DashboardPagePresenter = ({
                       </svg>
                       <input
                         type="text"
-                        className="input w-full h-auto"
+                        className="input h-auto w-full"
                         placeholder="タスクを追加"
                         autoFocus
                         // フォーカスが外れたとき
@@ -342,7 +342,7 @@ const DashboardPagePresenter = ({
                     viewBox="0 0 24 24"
                     strokeWidth={1.5}
                     stroke="currentColor"
-                    className="w-6 h-6"
+                    className="h-6 w-6"
                   >
                     <path
                       strokeLinecap="round"
@@ -366,7 +366,7 @@ const DashboardPagePresenter = ({
                 viewBox="0 0 24 24"
                 strokeWidth={1.5}
                 stroke="currentColor"
-                className="w-6 h-6"
+                className="h-6 w-6"
               >
                 <path
                   strokeLinecap="round"

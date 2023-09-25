@@ -70,7 +70,7 @@ export const DashboardProvider = ({
     {
       selectedTask: undefined,
       selectedList: undefined,
-    }
+    },
   );
 
   return (
