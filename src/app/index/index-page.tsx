@@ -1,12 +1,12 @@
-import { Button } from "lib/shared/ui";
+import { Link } from "react-router-dom";
 
 export function IndexPage() {
   return (
     <div>
       <p>Index page</p>
-      <Button as="link" to="/login">
+      <Link to="/login" className="btn">
         ログイン
-      </Button>
+      </Link>
     </div>
   );
 }

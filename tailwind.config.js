@@ -10,12 +10,10 @@ module.exports = {
     ),
     ...createGlobPatternsForDependencies(__dirname),
   ],
+  plugins: [require("daisyui")],
   theme: {
-    extend: {
-      fontFamily: {
-        sans: ["'Noto Sans JP'", "sans-serif"],
-      },
+    fontFamily: {
+      sans: ["'Noto Sans JP'", "sans-serif"],
     },
   },
-  plugins: [require("daisyui")],
 };

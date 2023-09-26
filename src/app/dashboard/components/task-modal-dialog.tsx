@@ -1,4 +1,3 @@
-import { Button } from "lib/shared/ui";
 import { ComponentPropsWithoutRef, forwardRef, useReducer } from "react";
 import useSWR from "swr";
 import { DocumentReference, getDoc } from "firebase/firestore";
@@ -242,9 +241,8 @@ export const TaskModalDialog = forwardRef<HTMLDialogElement, Props>(
                 </li>
               )}
             </ul>
-            <Button
-              as="button"
-              className="btn-sm mt-4"
+            <button
+              className="btn-sm mt-4 btn"
               onClick={async () => {
                 dispatchNewTaskState({
                   type: "OPEN",
@@ -252,7 +250,7 @@ export const TaskModalDialog = forwardRef<HTMLDialogElement, Props>(
               }}
             >
               サブタスクを追加
-            </Button>
+            </button>
           </div>
         </div>
       </dialog>

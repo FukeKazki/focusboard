@@ -1,4 +1,4 @@
-import { Button, cn } from "lib/shared/ui";
+import { cn } from "lib/shared/ui";
 import { useReducer, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { TaskModalDialog } from "./components/task-modal-dialog";
@@ -116,7 +116,7 @@ const DashboardPagePresenter = ({
               サブタスクを非表示
             </div>
           </label>
-          <Button as="button" className="btn-sm">
+          <button className="btn-sm btn">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -132,7 +132,7 @@ const DashboardPagePresenter = ({
               />
             </svg>
             ソート
-          </Button>
+          </button>
         </div>
       </div>
       {/* board */}
@@ -149,7 +149,7 @@ const DashboardPagePresenter = ({
             <div className="flex justify-between">
               <p className="text-2xl">{list.name}</p>
               <div className="grid grid-cols-2 gap-1">
-                <Button as="button" className="btn-square btn-sm">
+                <button className="btn-square btn-sm btn">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
@@ -164,10 +164,10 @@ const DashboardPagePresenter = ({
                       d="M12 4.5v15m7.5-7.5h-15"
                     />
                   </svg>
-                </Button>
+                </button>
                 <div className="dropdown-end dropdown">
                   <label tabIndex={0}>
-                    <Button as="button" className="btn-square btn-sm">
+                    <button className="btn-square btn-sm btn">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
@@ -182,7 +182,7 @@ const DashboardPagePresenter = ({
                           d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"
                         />
                       </svg>
-                    </Button>
+                    </button>
                   </label>
                   <ul
                     tabIndex={0}
@@ -326,9 +326,8 @@ const DashboardPagePresenter = ({
                 </li>
               )}
               <li>
-                <Button
-                  as="button"
-                  className="btn-block"
+                <button
+                  className="btn-block btn"
                   onClick={() =>
                     dispatchNewTaskState({
                       type: "OPEN",
@@ -351,7 +350,7 @@ const DashboardPagePresenter = ({
                     />
                   </svg>
                   タスクを追加
-                </Button>
+                </button>
               </li>
             </ul>
           </li>
@@ -359,7 +358,7 @@ const DashboardPagePresenter = ({
         {/* add list */}
         <li className="min-w-[400px]">
           <div className="flex justify-between">
-            <Button as="button" className="btn-block">
+            <button className="btn-block btn">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -375,7 +374,7 @@ const DashboardPagePresenter = ({
                 />
               </svg>
               セクションを追加
-            </Button>
+            </button>
           </div>
         </li>
       </ul>

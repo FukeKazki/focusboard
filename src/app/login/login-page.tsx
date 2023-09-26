@@ -1,4 +1,3 @@
-import { Button } from "lib/shared/ui";
 import { useSignInWithGoogle } from "react-firebase-hooks/auth";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -42,9 +41,9 @@ export function LoginPage() {
       {loading && <p>loading...</p>}
       {error && <p>error</p>}
       {user && <p>user: {JSON.stringify(user)}</p>}
-      <Button as="button" onClick={() => signInWithGoogle()}>
+      <button className="btn" onClick={() => signInWithGoogle()}>
         Sign in with Google
-      </Button>
+      </button>
     </div>
   );
 }
