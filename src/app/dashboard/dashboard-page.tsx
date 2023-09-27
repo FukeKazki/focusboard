@@ -9,26 +9,26 @@ import { DashboardProvider, useDashboard } from "./hooks/dashboard-state";
 
 type State =
   | {
-      visible: false;
-    }
+    visible: false;
+  }
   | {
-      visible: true;
-      listId: string;
-      text: string;
-    };
+    visible: true;
+    listId: string;
+    text: string;
+  };
 
 type Action =
   | {
-      type: "OPEN";
-      listId: string;
-    }
+    type: "OPEN";
+    listId: string;
+  }
   | {
-      type: "CLOSE";
-    }
+    type: "CLOSE";
+  }
   | {
-      type: "CHANGE_TEXT";
-      text: string;
-    };
+    type: "CHANGE_TEXT";
+    text: string;
+  };
 
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -358,23 +358,7 @@ const DashboardPagePresenter = ({
         {/* add list */}
         <li className="min-w-[400px]">
           <div className="flex justify-between">
-            <button className="btn-block btn">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="h-6 w-6"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 4.5v15m7.5-7.5h-15"
-                />
-              </svg>
-              セクションを追加
-            </button>
+            <button className="btn-block btn">セクションを追加</button>
           </div>
         </li>
       </ul>

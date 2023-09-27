@@ -23,24 +23,24 @@ const fetchSubTasks = async (subTaskIds: DocumentReference[]) => {
 
 type State =
   | {
-      visible: false;
-    }
+    visible: false;
+  }
   | {
-      visible: true;
-      text: string;
-    };
+    visible: true;
+    text: string;
+  };
 
 type Action =
   | {
-      type: "OPEN";
-    }
+    type: "OPEN";
+  }
   | {
-      type: "CLOSE";
-    }
+    type: "CLOSE";
+  }
   | {
-      type: "CHANGE_TEXT";
-      text: string;
-    };
+    type: "CHANGE_TEXT";
+    text: string;
+  };
 
 const reducer = (_state: State, action: Action): State => {
   switch (action.type) {
@@ -149,13 +149,14 @@ export const TaskModalDialog = forwardRef<HTMLDialogElement, Props>(
           </ul>
           <div className="mt-4">
             <p className="text-gray-500">サブタスク</p>
-            <ul className="mt-2 grid gap-2">
+            <ul className="mt-2">
               {subTasks?.map((subTask) => (
                 <li
                   key={subTask.id}
                   onClick={() => handleSelectSubTask(subTask)}
+                  className="cursor-pointer border-t border-gray-500 py-2 last:border-b"
                 >
-                  <div className="cursor-pointer border-t border-b border-gray-500 py-2">
+                  <div>
                     <p className="flex gap-2">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -242,7 +243,7 @@ export const TaskModalDialog = forwardRef<HTMLDialogElement, Props>(
               )}
             </ul>
             <button
-              className="btn-sm mt-4 btn"
+              className="btn-sm btn mt-4"
               onClick={async () => {
                 dispatchNewTaskState({
                   type: "OPEN",
