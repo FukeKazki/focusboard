@@ -1,4 +1,11 @@
-import { cn } from "lib/shared/ui";
+import {
+  ArrowUpDownIcon,
+  CheckCircleIcon,
+  EyeIcon,
+  EyeSlashIcon,
+  PlusIcon,
+  cn,
+} from "lib/shared/ui";
 import { useReducer, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { TaskModalDialog } from "./components/task-modal-dialog";
@@ -77,60 +84,16 @@ const DashboardPagePresenter = ({
           <label className="swap btn-sm btn">
             <input type="checkbox" onChange={() => setShowSubTask((v) => !v)} />
             <div className="swap-on flex items-center gap-2">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="h-6 w-6"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
+              <EyeIcon className="h-4 w-4" />
               サブタスクを表示
             </div>
             <div className="swap-off flex items-center gap-2">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="h-6 w-6"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"
-                />
-              </svg>
+              <EyeSlashIcon className="h-4 w-4" />
               サブタスクを非表示
             </div>
           </label>
           <button className="btn-sm btn">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="h-4 w-4"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M3 7.5L7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5"
-              />
-            </svg>
+            <ArrowUpDownIcon />
             ソート
           </button>
         </div>
@@ -150,20 +113,7 @@ const DashboardPagePresenter = ({
               <p className="text-2xl">{list.name}</p>
               <div className="grid grid-cols-2 gap-1">
                 <button className="btn-square btn-sm btn">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="h-6 w-6"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M12 4.5v15m7.5-7.5h-15"
-                    />
-                  </svg>
+                  <PlusIcon />
                 </button>
                 <div className="dropdown-end dropdown">
                   <label tabIndex={0}>
@@ -239,8 +189,7 @@ const DashboardPagePresenter = ({
                 >
                   <div
                     className={cn(
-                      "card-bordered card cursor-pointer rounded-md border-gray-200 shadow-sm",
-                      task.isSubTask && "border-gray-100",
+                      "card-bordered card cursor-pointer rounded-md shadow-sm",
                     )}
                     onClick={() => {
                       dispatchDashboardState({ type: "SELECT_TASK", task });
@@ -249,20 +198,7 @@ const DashboardPagePresenter = ({
                   >
                     <div className="card-body">
                       <p className="card-title text-lg font-normal">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth={1.5}
-                          stroke="currentColor"
-                          className="h-6 w-6"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
+                        <CheckCircleIcon />
                         {task.name}
                       </p>
                       <p className="text-sm text-gray-500">9月1日</p>
@@ -274,20 +210,7 @@ const DashboardPagePresenter = ({
                 <li>
                   <div className="card-bordered card card-body cursor-pointer rounded-md">
                     <div className="flex items-center gap-2">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={1.5}
-                        stroke="currentColor"
-                        className="h-6 w-6"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
+                      <PlusIcon />
                       <input
                         type="text"
                         className="input h-auto w-full"
@@ -335,20 +258,7 @@ const DashboardPagePresenter = ({
                     })
                   }
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="h-6 w-6"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M12 4.5v15m7.5-7.5h-15"
-                    />
-                  </svg>
+                  <PlusIcon />
                   タスクを追加
                 </button>
               </li>
@@ -358,7 +268,10 @@ const DashboardPagePresenter = ({
         {/* add list */}
         <li className="min-w-[400px]">
           <div className="flex justify-between">
-            <button className="btn-block btn">セクションを追加</button>
+            <button className="btn-block btn">
+              <PlusIcon />
+              セクションを追加
+            </button>
           </div>
         </li>
       </ul>
