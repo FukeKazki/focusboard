@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import Header from "../header/header";
+import { HashtagIcon } from "../icons/hashtag-icon";
 // import './layout.css';
 type Props = {
   children?: React.ReactNode;
@@ -23,20 +24,7 @@ export function Layout({ children, boards }: Props) {
           {boards.map((board, index) => (
             <li key={`${board.id}-${index}`}>
               <Link to={`dashboard/${board.id}`}>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="h-6 w-6"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M5.25 8.25h15m-16.5 7.5h15m-1.8-13.5l-3.9 19.5m-2.1-19.5l-3.9 19.5"
-                  />
-                </svg>
+                <HashtagIcon/>
                 {board.name}
               </Link>
             </li>
