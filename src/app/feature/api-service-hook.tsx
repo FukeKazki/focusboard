@@ -9,7 +9,9 @@ import {
   doc,
   getDoc,
   getDocs,
+  query,
   updateDoc,
+  where,
 } from "firebase/firestore";
 import { Board, Task } from "./type";
 import useSWR from "swr";
@@ -42,7 +44,6 @@ class ApiService {
     user: User,
     input: {
       boardId: string;
-      listId: string;
       taskId: string;
     },
   ) {
@@ -52,8 +53,6 @@ class ApiService {
       user.uid,
       "boards",
       input.boardId,
-      "lists",
-      input.listId,
       "tasks",
       input.taskId,
     );
@@ -72,53 +71,53 @@ class ApiService {
     const listSnapshots = await getDocs(listsRef);
     const lists = await Promise.all(
       listSnapshots.docs.map(async (doc) => {
-        const tasks = await this.fetchTasks(doc.ref);
-        return { id: doc.id, ...doc.data(), tasks };
+        // const tasks = await this.fetchTasks(doc.ref);
+        return { id: doc.id, ...doc.data() };
       }),
     );
     return lists;
   }
-  private async fetchTasks(listRef: DocumentReference) {
-    const tasksRef = collection(listRef, "tasks");
-    // const q = query(tasksRef, where('isSubTask', '==', false));
-    // subTask除外する
-    const taskSnapshots = await getDocs(tasksRef);
-    const tasks = taskSnapshots.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-    return tasks;
+  // private async fetchTasks(listRef: DocumentReference) {
+  //   const tasksRef = collection(listRef, "tasks");
+  //   // const q = query(tasksRef, where('isSubTask', '==', false));
+  //   // subTask除外する
+  //   const taskSnapshots = await getDocs(tasksRef);
+  //   const tasks = taskSnapshots.docs.map((doc) => ({
+  //     id: doc.id,
+  //     ...doc.data(),
+  //   }));
+  //   return tasks;
+  // }
+  async updateBoard(user: User, boardId: string, input: any) {
+    const boardRef = doc(
+      this.firestore,
+      "workspaces",
+      user.uid,
+      "boards",
+      boardId,
+    );
+    await updateDoc(boardRef, input);
   }
 
-  async addTask(user: User, boardId: string, listId: string, input: any) {
+  async addTask(user: User, boardId: string, input: any) {
     const boardRef = collection(
       firestore,
       "workspaces",
       user.uid ?? "",
       "boards",
       boardId,
-      "lists",
-      listId,
       "tasks",
     );
     return await addDoc(boardRef, input);
   }
 
-  async updateTask(
-    user: User,
-    boardId: string,
-    listId: string,
-    taskId: string,
-    input: any,
-  ) {
+  async updateTask(user: User, boardId: string, taskId: string, input: any) {
     const taskRef = doc(
       this.firestore,
       "workspaces",
       user.uid,
       "boards",
       boardId,
-      "lists",
-      listId,
       "tasks",
       taskId,
     );
@@ -142,15 +141,13 @@ class ApiService {
         user.uid,
         "boards",
         boardId,
-        "lists",
-        listId,
         "tasks",
         input.parent,
       ),
       isSubTask: true,
     });
 
-    await this.updateTask(user, boardId, listId, input.parent, {
+    await this.updateTask(user, boardId, input.parent, {
       children: arrayUnion(res),
     });
   }
@@ -175,10 +172,10 @@ export const useApiService = () => {
 
   const useTask = (
     user: User | null | undefined,
-    input: { boardId: string; listId: string; taskId: string },
+    input: { boardId: string; taskId: string },
   ) => {
     return useSWR(
-      ["task", user, input.boardId, input.listId, input.taskId],
+      ["task", user, input.boardId, input.taskId],
       async () => {
         if (!user) {
           return;
@@ -207,11 +204,11 @@ export const useApiService = () => {
   };
 
   const useAddTask = (user: User | null | undefined) => ({
-    addTask: (boardId: string, listId: string, input: any) => {
+    addTask: (boardId: string, input: any) => {
       if (!user) {
         return;
       }
-      return apiService.addTask(user, boardId, listId, input);
+      return apiService.addTask(user, boardId, input);
     },
   });
 
@@ -224,11 +221,25 @@ export const useApiService = () => {
     },
   });
 
+  type InputUpdateColumn = Pick<Board, "columns">;
+  const useUpdateBoard = (user: User | null | undefined) => ({
+    updateColumn: (boardId: string, board: Board, input: InputUpdateColumn) => {
+      if (!user) {
+        return;
+      }
+      return apiService.updateBoard(user, boardId, {
+        ...board,
+        ...input,
+      });
+    },
+  });
+
   return {
     useBoards,
     useTask,
     useBoard,
     useAddTask,
     useAddSubTask,
+    useUpdateBoard,
   };
 };

@@ -15,13 +15,18 @@ export type Task = {
 export type List = {
   id: string;
   name: string;
-  tasks: Task[];
+  order: string[];
+  // tasks: Task[];
 };
 
 export type Board = {
   id: string;
   name: string;
   lists: List[];
+  columns: {
+    listId: string;
+    taskIds: string[];
+  }[];
 };
 
 export type Workspace = {
