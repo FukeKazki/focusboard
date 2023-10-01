@@ -6,7 +6,6 @@ import {
 } from "lib/shared/ui";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { Board } from "../feature/type";
 import { useUser } from "../feature/user-hook";
 import { useApiService } from "../feature/api-service-hook";
 import { DashboardProvider } from "./hooks/dashboard-state";
@@ -20,19 +19,18 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
-import { KeyedMutator } from "swr";
 import { DashboarList } from "./components/dashboard-list";
 
-const DashboardPagePresenter = ({
-  board,
-  mutate,
-  updateColumn,
-}: {
-  board: Board | undefined;
-  mutate: KeyedMutator<Board | undefined>;
-  updateColumn: (...v: any) => any;
-}) => {
+const DashboardPagePresenter = () => {
+  const { id } = useParams();
+  const { currentUser } = useUser();
+  const { useBoard, useUpdateBoard } = useApiService();
+  const { data: board, mutate } = useBoard(currentUser, id as string);
+  const { updateColumn } = useUpdateBoard(currentUser);
+
+  // TODO: useDashboardに移動
   const [showSubTask, setShowSubTask] = useState(false);
+
   const sensors = useSensors(
     useSensor(MouseSensor, {
       activationConstraint: {
@@ -75,7 +73,8 @@ const DashboardPagePresenter = ({
       }
       return column;
     });
-    await updateColumn(board?.id, board, { columns: res });
+    if (!res) return;
+    await updateColumn(board?.id ?? "", { columns: res });
     mutate({
       ...board,
       columns: res,
@@ -125,7 +124,8 @@ const DashboardPagePresenter = ({
       }
     });
 
-    await updateColumn(board?.id, board, { columns: res });
+    if (!res) return;
+    await updateColumn(board?.id ?? "", { columns: res });
     mutate({
       ...board,
       columns: res,
@@ -182,20 +182,9 @@ const DashboardPagePresenter = ({
   );
 };
 export function DashboardPage() {
-  const { id } = useParams();
-  const { currentUser } = useUser();
-  const { useBoard, useUpdateBoard } = useApiService();
-  const { data: board, mutate } = useBoard(currentUser, id as string);
-  const { updateColumn } = useUpdateBoard(currentUser);
-
-  // TODO: mutate は useTask の callback に渡すか useSWRConfigのmutateを使う
   return (
     <DashboardProvider>
-      <DashboardPagePresenter
-        board={board}
-        updateColumn={updateColumn}
-        mutate={mutate}
-      />
+      <DashboardPagePresenter />
     </DashboardProvider>
   );
 }

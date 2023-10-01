@@ -223,12 +223,11 @@ export const useApiService = () => {
 
   type InputUpdateColumn = Pick<Board, "columns">;
   const useUpdateBoard = (user: User | null | undefined) => ({
-    updateColumn: (boardId: string, board: Board, input: InputUpdateColumn) => {
+    updateColumn: (boardId: string, input: InputUpdateColumn) => {
       if (!user) {
         return;
       }
       return apiService.updateBoard(user, boardId, {
-        ...board,
         ...input,
       });
     },
