@@ -4,24 +4,22 @@ import {
   EyeSlashIcon,
   PlusIcon,
 } from "lib/shared/ui";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { TaskModalDialog } from "./components/task-modal-dialog";
-import { Board, Task } from "../feature/type";
+import { Board } from "../feature/type";
 import { useUser } from "../feature/user-hook";
 import { useApiService } from "../feature/api-service-hook";
-import { DashboardProvider, useDashboard } from "./hooks/dashboard-state";
+import { DashboardProvider } from "./hooks/dashboard-state";
 import {
   closestCorners,
   DndContext,
   DragEndEvent,
   DragOverEvent,
-  KeyboardSensor,
-  PointerSensor,
+  MouseSensor,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
+import { arrayMove } from "@dnd-kit/sortable";
 import { KeyedMutator } from "swr";
 import { DashboarList } from "./components/dashboard-list";
 
@@ -34,14 +32,12 @@ const DashboardPagePresenter = ({
   mutate: KeyedMutator<Board | undefined>;
   updateColumn: (...v: any) => any;
 }) => {
-  const taskModalDialogRef = useRef<HTMLDialogElement>(null);
-
-  const { dispatchDashboardState } = useDashboard();
   const [showSubTask, setShowSubTask] = useState(false);
   const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
     }),
   );
 
@@ -182,16 +178,6 @@ const DashboardPagePresenter = ({
           </li>
         </DndContext>
       </ul>
-      <TaskModalDialog
-        ref={taskModalDialogRef}
-        boardId={board?.id ?? ""}
-        handleSelectSubTask={(selectedSubTask: Task) => {
-          dispatchDashboardState({
-            type: "SELECT_TASK",
-            task: selectedSubTask,
-          });
-        }}
-      />
     </div>
   );
 };

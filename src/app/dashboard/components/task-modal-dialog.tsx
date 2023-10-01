@@ -1,15 +1,14 @@
-import { ComponentPropsWithoutRef, forwardRef, useReducer } from "react";
+import { ComponentPropsWithoutRef, useReducer } from "react";
 import useSWR from "swr";
 import { DocumentReference, getDoc } from "firebase/firestore";
 import { Task } from "../../feature/type";
 import { useUser } from "../../feature/user-hook";
 import { useApiService } from "../../feature/api-service-hook";
 import { useDashboard } from "../hooks/dashboard-state";
+import { useParams } from "react-router-dom";
+import { useModal } from "react-hooks-use-modal";
 
-type Props = {
-  boardId: string;
-  handleSelectSubTask: (subTask: Task) => void;
-} & ComponentPropsWithoutRef<"dialog">;
+type Props = ComponentPropsWithoutRef<"div">;
 
 const fetchSubTasks = async (subTaskIds: DocumentReference[]) => {
   const subTasks = await Promise.all(
@@ -23,24 +22,24 @@ const fetchSubTasks = async (subTaskIds: DocumentReference[]) => {
 
 type State =
   | {
-    visible: false;
-  }
+      visible: false;
+    }
   | {
-    visible: true;
-    text: string;
-  };
+      visible: true;
+      text: string;
+    };
 
 type Action =
   | {
-    type: "OPEN";
-  }
+      type: "OPEN";
+    }
   | {
-    type: "CLOSE";
-  }
+      type: "CLOSE";
+    }
   | {
-    type: "CHANGE_TEXT";
-    text: string;
-  };
+      type: "CHANGE_TEXT";
+      text: string;
+    };
 
 const reducer = (_state: State, action: Action): State => {
   switch (action.type) {
@@ -61,14 +60,16 @@ const reducer = (_state: State, action: Action): State => {
   }
 };
 
-export const TaskModalDialog = forwardRef<HTMLDialogElement, Props>(
-  ({ boardId, handleSelectSubTask, ...props }, ref) => {
+export const useTaskModalDialog = () => {
+  const [Modal, open, close] = useModal();
+
+  const TaskModalDialog = ({ ...props }: Props) => {
+    const { id } = useParams();
     const { currentUser } = useUser();
-    const { dashboardState } = useDashboard();
+    const { dashboardState, dispatchDashboardState } = useDashboard();
     const { useTask, useAddSubTask } = useApiService();
     const { data, mutate: mutateTask } = useTask(currentUser, {
-      boardId: boardId,
-      listId: dashboardState.selectedList?.id ?? "",
+      boardId: id as string,
       taskId: dashboardState.selectedTask?.id ?? "",
     });
     const { addSubTask } = useAddSubTask(currentUser);
@@ -84,13 +85,14 @@ export const TaskModalDialog = forwardRef<HTMLDialogElement, Props>(
     });
     // TODO fetchParentTask
     return (
-      <dialog className="modal" ref={ref} {...props}>
-        <div className="modal-box max-w-5xl">
-          <form method="dialog">
-            <button className="btn-ghost btn-sm btn-circle btn absolute right-2 top-2">
-              ✕
-            </button>
-          </form>
+      <Modal>
+        <div {...props} className="rounded-xl bg-white p-10">
+          <button
+            className="btn-ghost btn-sm btn-circle btn absolute right-2 top-2"
+            onClick={close}
+          >
+            ✕
+          </button>
           {data?.parent && (
             <div className="mb-1 flex cursor-pointer items-center gap-1 text-gray-500 hover:underline">
               {data.parent.id}
@@ -153,7 +155,12 @@ export const TaskModalDialog = forwardRef<HTMLDialogElement, Props>(
               {subTasks?.map((subTask) => (
                 <li
                   key={subTask.id}
-                  onClick={() => handleSelectSubTask(subTask)}
+                  onClick={() => {
+                    dispatchDashboardState({
+                      type: "SELECT_TASK",
+                      task: subTask,
+                    });
+                  }}
                   className="cursor-pointer border-t border-gray-500 py-2 last:border-b"
                 >
                   <div>
@@ -216,7 +223,7 @@ export const TaskModalDialog = forwardRef<HTMLDialogElement, Props>(
                           }
                           // 入力されているときは追加
                           await addSubTask(
-                            boardId,
+                            id as string,
                             dashboardState.selectedList.id,
                             {
                               name: newTaskState.text,
@@ -254,7 +261,9 @@ export const TaskModalDialog = forwardRef<HTMLDialogElement, Props>(
             </button>
           </div>
         </div>
-      </dialog>
+      </Modal>
     );
-  },
-);
+  };
+
+  return [TaskModalDialog, open] as const;
+};
