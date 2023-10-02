@@ -7,26 +7,26 @@ import { useParams } from "react-router-dom";
 
 type State =
   | {
-      visible: false;
-    }
+    visible: false;
+  }
   | {
-      visible: true;
-      listId: string;
-      text: string;
-    };
+    visible: true;
+    listId: string;
+    text: string;
+  };
 
 type Action =
   | {
-      type: "OPEN";
-      listId: string;
-    }
+    type: "OPEN";
+    listId: string;
+  }
   | {
-      type: "CLOSE";
-    }
+    type: "CLOSE";
+  }
   | {
-      type: "CHANGE_TEXT";
-      text: string;
-    };
+    type: "CHANGE_TEXT";
+    text: string;
+  };
 
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -58,12 +58,12 @@ type Props = {
 export const DashboarList = memo(({ column }: Props) => {
   const { id } = useParams();
   const { currentUser } = useUser();
-  const { useBoard, useAddTask, useUpdateBoard } = useApiService();
+  const { useBoard, useAddTask, useUpdateBoard, useList } = useApiService();
   const { data: board, mutate } = useBoard(currentUser, id as string);
   const { addTask } = useAddTask(currentUser);
   const { updateColumn } = useUpdateBoard(currentUser);
+  const { data: list } = useList(currentUser, id as string, column.listId);
 
-  // TODO: get list data
   const [newTaskState, dispatchNewTaskState] = useReducer(reducer, {
     visible: false,
   });
@@ -72,12 +72,12 @@ export const DashboarList = memo(({ column }: Props) => {
     <li
       key={column.listId}
       className="min-w-[400px]"
-      // onClick={() =>
-      //   dispatchDashboardState({ type: "SELECT_LIST", list })
-      // }
+    // onClick={() =>
+    //   dispatchDashboardState({ type: "SELECT_LIST", list })
+    // }
     >
       <div className="flex justify-between">
-        <p className="text-2xl">list.name</p>
+        <p className="text-2xl">{list?.name}</p>
         <div className="grid grid-cols-2 gap-1">
           <button className="btn-square btn-sm btn">
             <PlusIcon />

@@ -13,7 +13,7 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
-import { Board, Task } from "./type";
+import { Board, List, Task } from "./type";
 import useSWR from "swr";
 import { firestore } from "@/app/lib/firebase";
 
@@ -77,17 +77,23 @@ class ApiService {
     );
     return lists;
   }
-  // private async fetchTasks(listRef: DocumentReference) {
-  //   const tasksRef = collection(listRef, "tasks");
-  //   // const q = query(tasksRef, where('isSubTask', '==', false));
-  //   // subTask除外する
-  //   const taskSnapshots = await getDocs(tasksRef);
-  //   const tasks = taskSnapshots.docs.map((doc) => ({
-  //     id: doc.id,
-  //     ...doc.data(),
-  //   }));
-  //   return tasks;
-  // }
+  // ╭──────────────────────────────────────────────────────────╮
+  // │  listIdからlistを取得                                    │
+  // ╰──────────────────────────────────────────────────────────╯
+  async fetchList(user: User, boardId: string, listId: string) {
+    const ref = doc(
+      this.firestore,
+      "workspaces",
+      user.uid,
+      "boards",
+      boardId,
+      "lists",
+      listId,
+    );
+    const list = await getDoc(ref);
+    return { id: list.id, ...list.data() } as List;
+  }
+
   async updateBoard(user: User, boardId: string, input: any) {
     const boardRef = doc(
       this.firestore,
@@ -233,6 +239,24 @@ export const useApiService = () => {
     },
   });
 
+  const useList = (
+    user: User | null | undefined,
+    boardId: string,
+    listId: string,
+  ) => {
+    return useSWR(
+      ["list", user, boardId, listId],
+      async () => {
+        if (!user) {
+          return null;
+        }
+        return apiService.fetchList(user, boardId, listId);
+      },
+      {
+        revalidateOnFocus: false,
+      },
+    );
+  };
   return {
     useBoards,
     useTask,
@@ -240,5 +264,6 @@ export const useApiService = () => {
     useAddTask,
     useAddSubTask,
     useUpdateBoard,
+    useList,
   };
 };
