@@ -15,7 +15,7 @@ import {
 } from "firebase/firestore";
 import { Board, Task } from "./type";
 import useSWR from "swr";
-import { firestore } from "../lib/firebase";
+import { firestore } from "@/app/lib/firebase";
 
 class ApiService {
   firestore: Firestore;

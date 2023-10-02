@@ -7,7 +7,6 @@ import {
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useUser } from "../feature/user-hook";
-import { useApiService } from "../feature/api-service-hook";
 import { DashboardProvider } from "./hooks/dashboard-state";
 import {
   closestCorners,
@@ -20,6 +19,7 @@ import {
 } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 import { DashboarList } from "./components/dashboard-list";
+import { useApiService } from "@/app/feature/api-service-hook";
 
 const DashboardPagePresenter = () => {
   const { id } = useParams();
