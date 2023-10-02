@@ -1,9 +1,9 @@
 import { createBrowserRouter } from "react-router-dom";
-import App from "./app";
-import { IndexPage } from "./index/index-page";
-import { LoginPage } from "./login/login-page";
-import { DashboardPage } from "./dashboard/dashboard-page";
-import { ErrorPage } from "./error/error-page";
+import App from "./pages/app";
+import { IndexPage } from "./pages/index/index-page";
+import { LoginPage } from "./pages/login/login-page";
+import { DashboardPage } from "./pages/dashboard/dashboard-page";
+import { ErrorPage } from "./pages/error/error-page";
 import { FirebaseAuthProvider } from "./feature/user-hook";
 
 // ╭──────────────────────────────────────────────────────────╮

@@ -2,8 +2,8 @@ import { useSignInWithGoogle } from "react-firebase-hooks/auth";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { useUser } from "../feature/user-hook";
-import { auth, firestore } from "../lib/firebase";
+import { useUser } from "../../feature/user-hook";
+import { auth, firestore } from "../../lib/firebase";
 
 export function LoginPage() {
   const { currentUser: user } = useUser();

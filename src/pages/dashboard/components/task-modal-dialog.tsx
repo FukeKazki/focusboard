@@ -1,9 +1,9 @@
 import { ComponentPropsWithoutRef, useReducer } from "react";
 import useSWR from "swr";
 import { DocumentReference, getDoc } from "firebase/firestore";
-import { Task } from "../../feature/type";
-import { useUser } from "../../feature/user-hook";
-import { useApiService } from "../../feature/api-service-hook";
+import { Task } from "../../../feature/type";
+import { useUser } from "../../../feature/user-hook";
+import { useApiService } from "../../../feature/api-service-hook";
 import { useDashboard } from "../hooks/dashboard-state";
 import { useParams } from "react-router-dom";
 import { useModal } from "react-hooks-use-modal";

@@ -1,8 +1,8 @@
 import { CheckCircleIcon, PlusIcon } from "lib/shared/ui";
 import { DroppableColumn } from "./droppable-column";
 import { memo, useReducer } from "react";
-import { useUser } from "../../feature/user-hook";
-import { useApiService } from "../../feature/api-service-hook";
+import { useUser } from "../../../feature/user-hook";
+import { useApiService } from "../../../feature/api-service-hook";
 import { useParams } from "react-router-dom";
 
 type State =

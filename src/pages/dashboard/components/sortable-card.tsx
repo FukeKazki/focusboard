@@ -1,8 +1,8 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { CheckCircleIcon, cn } from "lib/shared/ui";
-import { useApiService } from "../../feature/api-service-hook";
-import { useUser } from "../../feature/user-hook";
+import { useApiService } from "../../../feature/api-service-hook";
+import { useUser } from "../../../feature/user-hook";
 import { useParams } from "react-router-dom";
 import { memo } from "react";
 import { useTaskModalDialog } from "./task-modal-dialog";

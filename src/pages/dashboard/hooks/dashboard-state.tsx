@@ -1,5 +1,5 @@
 import { createContext, useContext, useReducer } from "react";
-import { List, Task } from "../../feature/type";
+import { List, Task } from "../../../feature/type";
 
 type State = {
   selectedTask: Task | undefined;
